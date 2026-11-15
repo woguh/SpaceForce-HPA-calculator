@@ -214,3 +214,52 @@
     transition: none;
   }
 }
+
+.selector-surface {
+  position: fixed;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  overflow: hidden;
+  max-width: none;
+}
+.selector-surface[open] { display: flex; flex-direction: column; }
+.selector-popover { border-radius: 12px; box-shadow: 0 12px 32px rgb(15 23 42 / 16%); }
+.selector-sheet { border-radius: 16px 16px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.selector-sheet::backdrop { background: rgb(2 6 23 / 60%); }
+.selector-search { border-color: #cbd5e1; background: #f8fafc; }
+.selector-search:focus-within { border-color: #0891b2; }
+.selector-search input::-webkit-search-cancel-button { display: none; }
+.selector-group, .selector-description { color: #475569; }
+.selector-option[aria-selected='true'] { font-weight: 600; }
+.selector-option[data-highlighted='true'] { background: #ecfeff; color: #164e63; }
+.selector-option[data-highlighted='true'] .selector-description { color: #155e75; }
+.selector-close { color: #475569; }
+.selector-close:hover { background: #f1f5f9; }
+.selector-surface .selector-close:focus-visible,
+.selector-options:focus-visible { outline: 2px solid #0891b2; outline-offset: -3px; }
+.selector-options { scrollbar-gutter: stable; touch-action: pan-y; }
+.selector-surface ::selection { background: #a5f3fc; color: #164e63; }
+.dark .selector-surface { border-color: #334155; background: #0f172a; color: #f1f5f9; }
+.dark .selector-popover { box-shadow: 0 12px 32px rgb(0 0 0 / 35%); }
+.dark .selector-search { border-color: #475569; background: #0b0f17; }
+.dark .selector-search:focus-within { border-color: #22d3ee; }
+.dark .selector-group, .dark .selector-description, .dark .selector-close { color: #94a3b8; }
+.dark .selector-option[data-highlighted='true'] { background: #164e63; color: #cffafe; }
+.dark .selector-option[data-highlighted='true'] .selector-description { color: #a5f3fc; }
+.dark .selector-close:hover { background: #1e293b; }
+.dark .selector-surface .selector-close:focus-visible,
+.dark .selector-options:focus-visible { outline-color: #22d3ee; }
+@media (prefers-reduced-motion: no-preference) {
+  .selector-popover[open] { animation: selector-open 140ms cubic-bezier(.16, 1, .3, 1); }
+  .selector-sheet[open] { animation: selector-open 180ms cubic-bezier(.16, 1, .3, 1); }
+  @keyframes selector-open { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (max-width: 639px), (pointer: coarse) {
+  .selector-trigger, .selector-option { font-size: 16px; }
+  .selector-option { min-height: 48px; }
+}

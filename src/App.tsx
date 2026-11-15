@@ -16,6 +16,7 @@ import { MobileScoreSummary } from './components/MobileScoreSummary';
 import { CountInput, DurationInput } from './components/PerformanceInput';
 import { ScoringTablesReference } from './components/ScoringTablesReference';
 import { SegmentedControl } from './components/SegmentedControl';
+import { Selector } from './components/Selector';
 import { ScoreIndicator } from './components/ScoreIndicator';
 import { CardioAltitudeBreakdown } from './components/CardioAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
@@ -390,39 +391,35 @@ export default function App() {
                   >
                     Age Bracket
                   </label>
-                  <select
+                  <Selector<AgeBracketId>
                     id="age-select"
-                    aria-label="Age Bracket"
+                    label="Age Bracket"
                     value={inputs.ageBracket}
-                    onChange={(e) => updateInputs({ ageBracket: e.target.value as AgeBracketId })}
-                    className="w-full py-2 px-3 text-xs lg:text-sm font-semibold rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
-                  >
-                    {AGE_BRACKETS.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.label}
-                      </option>
-                    ))}
-                  </select>
+                    options={AGE_BRACKETS.map(bracket => ({ value: bracket.id, label: bracket.label }))}
+                    onChange={ageBracket => updateInputs({ ageBracket })}
+                  />
                 </div>
 
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <div className="min-w-0">
                   <label htmlFor="installation-select" className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Base / installation</label>
-                  <select id="installation-select" value={inputs.installationId} onChange={(event) => { const base = SPACE_FORCE_INSTALLATIONS.find((item) => item.id === event.target.value); if (base) handleSelectBase(base); }} className="w-full min-h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 text-sm lg:text-base font-medium">
-                    {Object.values(ALTITUDE_GROUPS).map((group) => (
-                      <optgroup key={group.id} label={group.shortLabel}>
-                        {SPACE_FORCE_INSTALLATIONS.filter((base) => base.altitudeGroup === group.id).map((base) => <option key={base.id} value={base.id}>{base.name}</option>)}
-                      </optgroup>
-                    ))}
-                  </select>
+                  <Selector
+                    id="installation-select" label="Base / installation" value={inputs.installationId}
+                    searchLabel="Search bases" searchPlaceholder="Search a base or location…"
+                    options={Object.values(ALTITUDE_GROUPS).flatMap(group => SPACE_FORCE_INSTALLATIONS
+                      .filter(base => base.altitudeGroup === group.id)
+                      .map(base => ({ value: base.id, label: base.name, group: group.shortLabel, description: base.stateOrCountry, keywords: `${base.id} ${base.majorUnit}` })))}
+                    onChange={value => { const base = SPACE_FORCE_INSTALLATIONS.find(item => item.id === value); if (base) handleSelectBase(base); }}
+                  />
                 </div>
                 <div className="min-w-0">
                   <label htmlFor="altitude-select" className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Test altitude group</label>
-                  <select id="altitude-select" value={inputs.isManualAltitude ? inputs.altitudeGroup : 'auto'} onChange={(event) => updateInputs({ altitudeGroup: event.target.value === 'auto' ? activeInstallation.altitudeGroup : event.target.value as AltitudeGroupId, isManualAltitude: event.target.value !== 'auto' })} className="w-full min-h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 text-sm lg:text-base font-medium">
-                    <option value="auto">Use base altitude</option>
-                    {Object.values(ALTITUDE_GROUPS).map((group) => <option key={group.id} value={group.id}>{group.shortLabel}</option>)}
-                  </select>
+                  <Selector<AltitudeGroupId | 'auto'>
+                    id="altitude-select" label="Test altitude group" value={inputs.isManualAltitude ? inputs.altitudeGroup : 'auto'}
+                    options={[{ value: 'auto', label: 'Use base altitude' }, ...Object.values(ALTITUDE_GROUPS).map(group => ({ value: group.id, label: group.shortLabel }))]}
+                    onChange={value => updateInputs({ altitudeGroup: value === 'auto' ? activeInstallation.altitudeGroup : value, isManualAltitude: value !== 'auto' })}
+                  />
                 </div>
               </div>
               <p className="flex items-start gap-2 text-xs lg:text-sm text-slate-500 dark:text-slate-400"><MapPin className="h-4 w-4 shrink-0" />{inputs.isManualAltitude ? 'Custom test altitude: ' : `${activeInstallation.geographicElevationFt.toLocaleString()} ft · `}{altitudeSpec.shortLabel}</p>
