@@ -80,6 +80,11 @@ export interface ComponentScoreResult {
   adjustedPerformanceLabel: string;
   altitudeApplied: boolean;
   altitudeAdjustmentNote: string;
+  runTiming?: {
+    rawSeconds: number;
+    deductionSeconds: number;
+    scoredSeconds: number;
+  };
   minimumRequirementLabel: string;
   maximumRequirementLabel: string;
   nextThreshold: NextThresholdInfo;
@@ -568,6 +573,7 @@ export function calculateAssessment(inputs: AssessmentInputs): AssessmentResult 
       componentKey: 'cardio',
       componentTitle: 'Cardiorespiratory Fitness',
       eventLabel: '2.0-Mile Run',
+      runTiming: { rawSeconds: rawRunSec, deductionSeconds: deductionSec, scoredSeconds: adjustedRunSec },
       exempt: false,
       earnedPoints: points,
       maxPoints: cardioMaxPts,

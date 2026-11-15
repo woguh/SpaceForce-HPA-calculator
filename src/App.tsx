@@ -16,6 +16,7 @@ import { MobileScoreSummary } from './components/MobileScoreSummary';
 import { CountInput, DurationInput } from './components/PerformanceInput';
 import { ScoringTablesReference } from './components/ScoringTablesReference';
 import { ScoreIndicator } from './components/ScoreIndicator';
+import { RunAltitudeBreakdown } from './components/RunAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
 import { assessmentEntryCompletion, assessmentEntrySummary, assessmentInputsForEntry, EMPTY_PERFORMANCE, profileSettingsForEntry, type AssessmentEntry } from './utils/assessmentEntry';
 import type { WaistMeasurements } from './utils/waistRatio';
@@ -505,7 +506,7 @@ export default function App() {
               ) : (
                 <div className="space-y-2">
                   <DurationInput label="Run time" sliderLabel="Run time slider" minutes={inputs.runMinutes} seconds={inputs.runSeconds} min={15} max={3600} sliderMax={1800} onChange={(minutes, seconds) => updateDuration('runMinutes', 'runSeconds', minutes, seconds)} />
-                  {completion.cardio && result.cardio.altitudeApplied && <p className="text-xs font-mono text-amber-700 dark:text-amber-400">Scored as {result.cardio.adjustedPerformanceLabel}</p>}
+                  {completion.cardio && result.cardio.runTiming && <RunAltitudeBreakdown timing={result.cardio.runTiming} altitudeGroup={inputs.altitudeGroup} />}
                 </div>
               )}
 
