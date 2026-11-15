@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build & TypeScript outputs
+build/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables & secrets (keep .env.example)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.crt
+*.cer
+*serviceAccount*.json
+*credentials*.json
+
+# Test & browser verification artifacts
+.playwright-cli/
+playwright-report/
+test-results/
+blob-report/
+
+# OS & editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cloudflare
+.wrangler/
+.dev.vars
+.dev.vars.*

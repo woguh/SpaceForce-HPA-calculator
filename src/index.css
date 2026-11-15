@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-display: 'Chakra Petch', sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+
+  code, pre, .font-mono, .tabular-nums {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom subtle scrollbars for data tables and ASCII telemetry */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}
+
+.calculator-app :is(button, input, select, a):focus-visible {
+  outline: 2px solid #06b6d4;
+  outline-offset: 3px;
+}
+
+.score-card {
+  transition: border-color 180ms ease-out;
+}
+
+.score-card:has(.score-indicator[data-maxed='true']) {
+  border-color: rgb(16 185 129 / 55%);
+}
+
+.score-indicator[data-celebrating='true'] .score-indicator__value {
+  animation: score-max-pop 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.score-indicator[data-celebrating='true']::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: score-max-orbit 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes score-max-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+@keyframes score-max-orbit {
+  from { transform: scale(0.8); opacity: 0.7; }
+  to { transform: scale(1.35); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .score-card {
+    transition-duration: 0s;
+  }
+
+  .score-indicator[data-celebrating='true'] .score-indicator__value {
+    animation: none;
+  }
+
+  .score-indicator[data-celebrating='true']::after {
+    display: none;
+    animation: none;
+  }
+}
+
+@media (max-width: 639px), (pointer: coarse) {
+  .calculator-app :is(button, select, input) {
+    min-height: 44px;
+  }
+
+  .calculator-app button {
+    min-width: 44px;
+  }
+
+  .calculator-app :is(input:not([type='range']), select) {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 639px) {
+  html {
+    scroll-padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media print {
+  .mobile-score-summary {
+    display: none;
+  }
+}

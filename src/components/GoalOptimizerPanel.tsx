@@ -1,0 +1,209 @@
+import React, { useMemo } from 'react';
+import { CheckCircle2, Target } from 'lucide-react';
+import { AssessmentInputs, GoalComponentRecommendation, calculateTargetGoalPlan } from '../utils/calculator';
+
+interface GoalOptimizerPanelProps {
+  inputs: AssessmentInputs;
+  targetScore: number;
+  onTargetChange: (score: number) => void;
+}
+
+const TARGET_PRESETS = [75, 80, 85, 90, 95];
+
+function GoalPerformance({ recommendation: rec, kind }: { recommendation: GoalComponentRecommendation; kind: 'current' | 'balanced' | 'single' }) {
+  if (kind === 'current') {
+    return <><div className="font-semibold text-slate-900 dark:text-slate-100">{rec.currentPerformanceLabel}</div><div className="text-xs text-slate-500 dark:text-slate-400">{rec.currentPoints.toFixed(1)} / {rec.maxPoints} pts</div></>;
+  }
+  if (kind === 'balanced') {
+    return <><div className="font-bold text-cyan-700 dark:text-cyan-300">{rec.balancedTargetPerformanceLabel}</div><div className="text-xs text-slate-500 dark:text-slate-400">{rec.balancedTargetPoints.toFixed(1)} pts ({rec.balancedDeltaLabel})</div></>;
+  }
+  return <><div className={rec.singlePathAchievable ? 'font-semibold text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}>{rec.singlePathPerformanceLabel}</div><div className="text-xs text-slate-500 dark:text-slate-400">{rec.singlePathDeltaLabel}</div></>;
+}
+
+export const GoalOptimizerPanel: React.FC<GoalOptimizerPanelProps> = ({ inputs, targetScore, onTargetChange }) => {
+
+  const plan = useMemo(
+    () => calculateTargetGoalPlan(inputs, targetScore),
+    [inputs, targetScore]
+  );
+
+  return (
+    <section
+      id="goal-calculator-section"
+      aria-labelledby="goal-calculator-heading"
+      className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D111A] p-5"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div>
+          <h2
+            id="goal-calculator-heading"
+            className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2"
+          >
+            <Target className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+            <span>Target Score Goal Calculator</span>
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Calculate the exact repetitions, run times, or shuttles needed to achieve your target composite score
+          </p>
+        </div>
+
+        <div role="status" aria-live="polite" aria-atomic="true" className="font-mono text-right">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Target Composite:{' '}
+            <strong className="text-cyan-600 dark:text-cyan-400 tabular-nums">
+              {plan.targetCompositeScore.toFixed(1)} pts
+            </strong>
+          </div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
+            Current: {plan.currentCompositeScore.toFixed(1)} pts ·{' '}
+            {plan.alreadyAchieved ? 'Target Met' : plan.pointsGap > 0 ? `+${plan.pointsGap.toFixed(1)} pts needed` : 'Event minimum not met'}
+          </div>
+        </div>
+      </div>
+
+      {/* Target Preset Buttons & Fine Slider */}
+      <div className="space-y-3 mb-4">
+        <div
+          role="group"
+          aria-label="Target Score Presets"
+          className="grid grid-cols-3 min-[360px]:grid-cols-5 gap-1.5"
+        >
+          {TARGET_PRESETS.map((preset) => {
+            const active = Math.abs(targetScore - preset) < 0.1;
+            return (
+              <button
+                key={preset}
+                type="button"
+                aria-pressed={active}
+                onClick={() => onTargetChange(preset)}
+                className={`px-1 py-1.5 rounded text-[11px] sm:text-xs font-mono font-medium border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                  active
+                    ? 'border-cyan-500 bg-cyan-500/15 text-slate-900 dark:text-white font-bold'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                }`}
+              >
+                {preset} pts
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="text-xs text-slate-600 dark:text-slate-400">
+          {targetScore === 75 ? '75 points: Health Maintenance passing threshold.' : targetScore === 90 ? '90 points: Fit to Fight threshold.' : `${targetScore.toFixed(1)} points: your personal score target.`} All event minimums must also be met.
+        </p>
+        <div className="flex items-center gap-3">
+          <label
+            htmlFor="target-score-slider"
+            className="text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap"
+          >
+            Custom Target:
+          </label>
+          <input
+            id="target-score-slider"
+            type="range"
+            min={75}
+            max={100}
+            step={0.5}
+            value={targetScore}
+            aria-valuetext={`${targetScore.toFixed(1)} points`}
+            onChange={(e) => onTargetChange(Number(e.target.value))}
+            className="min-w-0 flex-1 accent-cyan-500 cursor-pointer"
+          />
+          <span className="font-mono text-xs font-bold text-slate-900 dark:text-white w-16 text-right tabular-nums">
+            {targetScore.toFixed(1)} pts
+          </span>
+        </div>
+      </div>
+
+      {plan.alreadyAchieved ? (
+        <div className="p-3.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 flex items-center gap-2.5 text-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>
+            Your current performance (<strong>{plan.currentCompositeScore.toFixed(1)} pts</strong>) already meets or exceeds the{' '}
+            <strong>{plan.targetCompositeScore.toFixed(1)}-point</strong> target with all component minimums satisfied.
+          </span>
+        </div>
+      ) : (
+        <>
+          <div className="sm:hidden divide-y divide-slate-200 dark:divide-slate-800">
+            {plan.recommendations.map((rec) => (
+              <article key={rec.componentKey} aria-label={`${rec.componentTitle} goal`} className="py-5 first:pt-1 last:pb-0">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{rec.componentTitle}</h3>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{rec.eventLabel}</p>
+                <dl className="mt-4 space-y-4 text-sm">
+                  {([
+                    ['current', 'Current'],
+                    ['balanced', 'Balanced Goal Plan'],
+                    ['single', 'Single-Event Path'],
+                  ] as const).map(([kind, label]) => (
+                    <div key={kind} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-3 items-start">
+                      <dt className="text-xs font-medium text-slate-600 dark:text-slate-400">{label}</dt>
+                      <dd className="text-right font-mono tabular-nums break-words"><GoalPerformance recommendation={rec} kind={kind} /></dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
+            ))}
+          </div>
+        <div className="hidden sm:block overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                <th className="py-2.5 px-3 font-semibold">Component & Event</th>
+                <th className="py-2.5 px-3 font-semibold text-right">Current</th>
+                <th className="py-2.5 px-3 font-semibold text-right">Balanced Goal Plan</th>
+                <th className="py-2.5 px-3 font-semibold text-right">Single-Event Path</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
+              {plan.recommendations.map((rec) => (
+                <tr
+                  key={rec.componentKey}
+                  className="hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors"
+                >
+                  <td className="py-2.5 px-3 font-sans">
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">
+                      {rec.componentTitle}
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {rec.eventLabel}
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-3 text-right tabular-nums">
+                    <div className="text-slate-900 dark:text-slate-100 font-semibold">
+                      {rec.currentPerformanceLabel}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      {rec.currentPoints.toFixed(1)} / {rec.maxPoints} pts
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-3 text-right tabular-nums">
+                    <div className="text-cyan-700 dark:text-cyan-300 font-bold">
+                      {rec.balancedTargetPerformanceLabel}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      {rec.balancedTargetPoints.toFixed(1)} pts ({rec.balancedDeltaLabel})
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-3 text-right tabular-nums">
+                    <div
+                      className={
+                        rec.singlePathAchievable
+                          ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+                          : 'text-slate-500 dark:text-slate-400'
+                      }
+                    >
+                      {rec.singlePathPerformanceLabel}
+                    </div>
+                    <div className="text-[11px] text-slate-500">{rec.singlePathDeltaLabel}</div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        </>
+      )}
+    </section>
+  );
+};
