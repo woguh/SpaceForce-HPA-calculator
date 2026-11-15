@@ -16,6 +16,7 @@ import { MobileScoreSummary } from './components/MobileScoreSummary';
 import { CountInput, DurationInput } from './components/PerformanceInput';
 import { ScoringTablesReference } from './components/ScoringTablesReference';
 import { ScoreIndicator } from './components/ScoreIndicator';
+import { CardioAltitudeBreakdown } from './components/CardioAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
 import { assessmentEntryCompletion, assessmentEntrySummary, assessmentInputsForEntry, EMPTY_PERFORMANCE, profileSettingsForEntry, type AssessmentEntry } from './utils/assessmentEntry';
 import type { WaistMeasurements } from './utils/waistRatio';
@@ -35,7 +36,6 @@ import {
 } from './data/scoringStandards';
 import {
   calculateAssessment,
-  formatHamrLevelShuttle,
 } from './utils/calculator';
 
 const STORAGE_KEY_INPUTS = 'ussf_hpa_calculator_inputs_v1';
@@ -494,20 +494,18 @@ export default function App() {
               ) : inputs.cardioEvent === 'hamr' ? (
                 <div className="space-y-2">
                   <CountInput label="HAMR shuttles" sliderLabel="HAMR shuttles" value={inputs.hamrShuttles} min={0} max={130} onChange={(value) => updateInputs({ hamrShuttles: value })} />
-                  {completion.cardio && <p className="text-xs font-mono text-slate-500 dark:text-slate-400">{formatHamrLevelShuttle(scoringInputs.hamrShuttles)}</p>}
-                  {completion.cardio && result.cardio.altitudeApplied && <p className="text-xs font-mono text-amber-700 dark:text-amber-400">Scored as {result.cardio.adjustedPerformanceLabel}</p>}
                 </div>
               ) : inputs.cardioEvent === 'walk_2km' ? (
                 <div className="space-y-2">
                   <DurationInput label="Walk time" sliderLabel="Walk time slider" minutes={inputs.walkMinutes} seconds={inputs.walkSeconds} min={15} max={3600} onChange={(minutes, seconds) => updateDuration('walkMinutes', 'walkSeconds', minutes, seconds)} />
-                  {completion.cardio && result.cardio.altitudeApplied && <p className="text-xs font-mono text-amber-700 dark:text-amber-400">{result.cardio.adjustedPerformanceLabel}</p>}
                 </div>
               ) : (
                 <div className="space-y-2">
                   <DurationInput label="Run time" sliderLabel="Run time slider" minutes={inputs.runMinutes} seconds={inputs.runSeconds} min={15} max={3600} sliderMax={1800} onChange={(minutes, seconds) => updateDuration('runMinutes', 'runSeconds', minutes, seconds)} />
-                  {completion.cardio && result.cardio.altitudeApplied && <p className="text-xs font-mono text-amber-700 dark:text-amber-400">Scored as {result.cardio.adjustedPerformanceLabel}</p>}
                 </div>
               )}
+
+              {!inputs.cardioExempt && completion.cardio && result.cardio.altitudeBreakdown && <CardioAltitudeBreakdown breakdown={result.cardio.altitudeBreakdown} altitudeGroup={inputs.altitudeGroup} />}
 
               <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs font-mono text-slate-500">
                 <span>

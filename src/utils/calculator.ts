@@ -80,6 +80,10 @@ export interface ComponentScoreResult {
   adjustedPerformanceLabel: string;
   altitudeApplied: boolean;
   altitudeAdjustmentNote: string;
+  altitudeBreakdown?:
+    | { event: 'run'; rawSeconds: number; deductionSeconds: number; scoredSeconds: number }
+    | { event: 'hamr'; rawShuttles: number; bonusShuttles: number; scoredShuttles: number }
+    | { event: 'walk'; rawSeconds: number; standardLimitSeconds: number; allowanceSeconds: number; adjustedLimitSeconds: number };
   minimumRequirementLabel: string;
   maximumRequirementLabel: string;
   nextThreshold: NextThresholdInfo;
@@ -361,6 +365,7 @@ export function calculateAssessment(inputs: AssessmentInputs): AssessmentResult 
       componentKey: 'cardio',
       componentTitle: 'Cardiorespiratory Fitness',
       eventLabel: '2.0-Kilometer Walk (Medical Alternative)',
+      altitudeBreakdown: { event: 'walk', rawSeconds: rawWalkSec, standardLimitSeconds: baseMaxWalkSec, allowanceSeconds: walkAltAllowanceSec, adjustedLimitSeconds: maxAllowedWalkSec },
       exempt: false,
       isPassFailOnly: true,
       earnedPoints: 0,
@@ -471,6 +476,7 @@ export function calculateAssessment(inputs: AssessmentInputs): AssessmentResult 
       componentKey: 'cardio',
       componentTitle: 'Cardiorespiratory Fitness',
       eventLabel: '20m HAMR Shuttle Run',
+      altitudeBreakdown: { event: 'hamr', rawShuttles, bonusShuttles, scoredShuttles: adjustedShuttles },
       exempt: false,
       earnedPoints: points,
       maxPoints: cardioMaxPts,
@@ -568,6 +574,7 @@ export function calculateAssessment(inputs: AssessmentInputs): AssessmentResult 
       componentKey: 'cardio',
       componentTitle: 'Cardiorespiratory Fitness',
       eventLabel: '2.0-Mile Run',
+      altitudeBreakdown: { event: 'run', rawSeconds: rawRunSec, deductionSeconds: deductionSec, scoredSeconds: adjustedRunSec },
       exempt: false,
       earnedPoints: points,
       maxPoints: cardioMaxPts,
