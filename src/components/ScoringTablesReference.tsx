@@ -33,12 +33,12 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
         <div>
           <h2
             id="scoring-tables-heading"
-            className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2"
+            className="text-base lg:text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2"
           >
             <Table2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
             <span>USSF HPA Standards Library</span>
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs lg:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Full scoring rows, altitude adjustments, walk standards, and grading rules for the charts currently used by this calculator.
           </p>
         </div>
@@ -62,7 +62,7 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
               type="button"
               aria-pressed={subTab === t.id}
               onClick={() => setSubTab(t.id)}
-              className={`px-2.5 py-1 text-xs font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-2.5 py-1 text-xs lg:text-sm font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                 subTab === t.id
                   ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -80,13 +80,13 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
         <div className="space-y-5">
           {/* Table A3.4: 20m HAMR Shuttle Adjustments */}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+            <h3 className="text-xs lg:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
               Table A3.4. Altitude Time Correction for 20-Meter HAMR (All Age Brackets)
             </h3>
             <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800">
-              <table className="w-full text-left border-collapse text-xs font-mono">
+              <table className="w-full text-left border-collapse text-xs lg:text-sm font-mono">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+                  <tr className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-[11px] lg:text-sm text-slate-500 dark:text-slate-400">
                     <th className="py-2 px-3 font-semibold">Event</th>
                     <th className="py-2 px-3 font-semibold text-right">
                       Group 1 (5250–5499 ft)
@@ -127,12 +127,12 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
 
           {/* Table A3.1: 2.0-Mile Run Altitude Time Correction */}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+            <h3 className="text-xs lg:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
               Table A3.1. Altitude Time Correction for 2.0 Mile Run (Subtracted from Raw Run Time)
             </h3>
             <div className="max-h-80 overflow-y-auto overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800">
-              <table className="w-full text-left border-collapse text-xs font-mono">
-                <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+              <table className="w-full text-left border-collapse text-xs lg:text-sm font-mono">
+                <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-[11px] lg:text-sm text-slate-500 dark:text-slate-400">
                   <tr>
                     <th className="py-2.5 px-3 font-semibold">2 Mile Run Time (min:sec)</th>
                     <th className="py-2.5 px-3 font-semibold text-right">
@@ -179,7 +179,7 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
 
           {/* Tables A3.2 & A3.3: 2.0-Kilometer Walk Maximum Allowable Times by Age & Altitude */}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+            <h3 className="text-xs lg:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
               Tables A3.2 (Male) & A3.3 (Female). Altitude Time Correction for 2.0 Kilometer Walk
             </h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -188,12 +188,12 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
                   key={s}
                   className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800"
                 >
-                  <div className="px-3 py-2 bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold capitalize">
+                  <div className="px-3 py-2 bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-xs lg:text-sm font-semibold capitalize">
                     {s === 'male' ? 'Table A3.2 — Male 2.0 km Max Walk Time' : 'Table A3.3 — Female 2.0 km Max Walk Time'}
                   </div>
-                  <table className="w-full text-left border-collapse text-xs font-mono">
+                  <table className="w-full text-left border-collapse text-xs lg:text-sm font-mono">
                     <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+                      <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] lg:text-sm text-slate-500 dark:text-slate-400">
                         <th className="py-2 px-2.5 font-semibold">Age (yrs)</th>
                         <th className="py-2 px-2.5 font-semibold text-right">Baseline</th>
                         <th className="py-2 px-2.5 font-semibold text-right">Group 1</th>
@@ -225,7 +225,7 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
       )}
 
       {subTab === 'WHTR' && (
-        <div className="space-y-4 text-sm">
+        <div className="space-y-4 text-sm lg:text-base">
           <h3 className="font-bold">Separate pass/fail waist-to-height check</h3>
           <p>Divide waist by height using inches for both measurements. Round the ratio to two decimals to match the supplied chart. This check does not add points to the HPA composite.</p>
           <table className="w-full text-left"><thead><tr><th scope="col" className="p-3">Rounded ratio</th><th scope="col" className="p-3">Result</th></tr></thead><tbody><tr className="border-t border-slate-200 dark:border-slate-800"><td className="p-3">Below {WAIST_RATIO_FAIL_THRESHOLD.toFixed(2)}</td><td className="p-3 font-bold text-emerald-700 dark:text-emerald-400">PASS</td></tr><tr className="border-t border-slate-200 dark:border-slate-800"><td className="p-3">{WAIST_RATIO_FAIL_THRESHOLD.toFixed(2)} and above</td><td className="p-3 font-bold text-rose-700 dark:text-rose-400">FAIL</td></tr></tbody></table>
