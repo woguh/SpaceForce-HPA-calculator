@@ -15,6 +15,7 @@ import { CopyResultsButton } from './components/CopyResultsButton';
 import { MobileScoreSummary } from './components/MobileScoreSummary';
 import { CountInput, DurationInput } from './components/PerformanceInput';
 import { ScoringTablesReference } from './components/ScoringTablesReference';
+import { SegmentedControl } from './components/SegmentedControl';
 import { ScoreIndicator } from './components/ScoreIndicator';
 import { CardioAltitudeBreakdown } from './components/CardioAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
@@ -447,41 +448,14 @@ export default function App() {
                   1. Cardiorespiratory
                 </h2>
                 <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
-                  <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg">
-                    {(
-                      [
-                        { id: 'run_2_0', label: '2.0-Mile Run' },
-                        { id: 'hamr', label: '20m HAMR' },
-                        { id: 'walk_2km', label: '2.0-km Walk' },
-                      ] as { id: CardioEventId; label: string }[]
-                    ).map((ev) => (
-                      <button
-                        key={ev.id}
-                        type="button"
-                        onClick={() => updateInputs({ cardioEvent: ev.id, cardioExempt: false })}
-                        aria-pressed={!inputs.cardioExempt && inputs.cardioEvent === ev.id}
-                        className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
-                          !inputs.cardioExempt && inputs.cardioEvent === ev.id
-                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {ev.label}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => updateInputs({ cardioExempt: !inputs.cardioExempt })}
-                      aria-pressed={inputs.cardioExempt}
-                      className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
-                        inputs.cardioExempt
-                          ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Exempt
-                    </button>
-                  </div>
+                  <SegmentedControl<CardioEventId | 'exempt'>
+                    label="Cardio event"
+                    value={inputs.cardioExempt ? 'exempt' : inputs.cardioEvent}
+                    options={[{ value: 'run_2_0', label: '2.0-Mile Run' }, { value: 'hamr', label: '20m HAMR' }, { value: 'walk_2km', label: '2.0-km Walk' }, { value: 'exempt', label: 'Exempt', tone: 'amber' }]}
+                    onChange={event => event === 'exempt'
+                      ? updateInputs({ cardioExempt: !inputs.cardioExempt })
+                      : updateInputs({ cardioEvent: event, cardioExempt: false })}
+                  />
                   <ScoreIndicator result={result.cardio} pending={!completion.cardio} />
                 </div>
               </div>
@@ -527,40 +501,14 @@ export default function App() {
                   2. Muscular Strength
                 </h2>
                 <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
-                  <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg">
-                    {(
-                      [
-                        { id: 'pushups', label: 'Push-ups (1m)' },
-                        { id: 'hr_pushups', label: 'Hand-Release (2m)' },
-                      ] as { id: StrengthEventId; label: string }[]
-                    ).map((ev) => (
-                      <button
-                        key={ev.id}
-                        type="button"
-                        onClick={() => updateInputs({ strengthEvent: ev.id, strengthExempt: false })}
-                        aria-pressed={!inputs.strengthExempt && inputs.strengthEvent === ev.id}
-                        className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
-                          !inputs.strengthExempt && inputs.strengthEvent === ev.id
-                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {ev.label}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => updateInputs({ strengthExempt: !inputs.strengthExempt })}
-                      aria-pressed={inputs.strengthExempt}
-                      className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
-                        inputs.strengthExempt
-                          ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Exempt
-                    </button>
-                  </div>
+                  <SegmentedControl<StrengthEventId | 'exempt'>
+                    label="Strength event"
+                    value={inputs.strengthExempt ? 'exempt' : inputs.strengthEvent}
+                    options={[{ value: 'pushups', label: 'Push-ups (1m)' }, { value: 'hr_pushups', label: 'Hand-Release (2m)' }, { value: 'exempt', label: 'Exempt', tone: 'amber' }]}
+                    onChange={event => event === 'exempt'
+                      ? updateInputs({ strengthExempt: !inputs.strengthExempt })
+                      : updateInputs({ strengthEvent: event, strengthExempt: false })}
+                  />
                   <ScoreIndicator result={result.strength} pending={!completion.strength} />
                 </div>
               </div>
@@ -594,41 +542,14 @@ export default function App() {
                   3. Core Endurance
                 </h2>
                 <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
-                  <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg">
-                    {(
-                      [
-                        { id: 'situps', label: 'Sit-ups (1m)' },
-                        { id: 'plank', label: 'Plank' },
-                        { id: 'crunches', label: 'Reverse Crunch (2m)' },
-                      ] as { id: CoreEventId; label: string }[]
-                    ).map((ev) => (
-                      <button
-                        key={ev.id}
-                        type="button"
-                        onClick={() => updateInputs({ coreEvent: ev.id, coreExempt: false })}
-                        aria-pressed={!inputs.coreExempt && inputs.coreEvent === ev.id}
-                        className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
-                          !inputs.coreExempt && inputs.coreEvent === ev.id
-                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {ev.label}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => updateInputs({ coreExempt: !inputs.coreExempt })}
-                      aria-pressed={inputs.coreExempt}
-                      className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
-                        inputs.coreExempt
-                          ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Exempt
-                    </button>
-                  </div>
+                  <SegmentedControl<CoreEventId | 'exempt'>
+                    label="Core event"
+                    value={inputs.coreExempt ? 'exempt' : inputs.coreEvent}
+                    options={[{ value: 'situps', label: 'Sit-ups (1m)' }, { value: 'plank', label: 'Plank' }, { value: 'crunches', label: 'Reverse Crunch (2m)' }, { value: 'exempt', label: 'Exempt', tone: 'amber' }]}
+                    onChange={event => event === 'exempt'
+                      ? updateInputs({ coreExempt: !inputs.coreExempt })
+                      : updateInputs({ coreEvent: event, coreExempt: false })}
+                  />
                   <ScoreIndicator result={result.core} pending={!completion.core} />
                 </div>
               </div>
