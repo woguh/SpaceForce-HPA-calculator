@@ -18,7 +18,7 @@ function IntegerInput({ label, accessibleLabel, value, min, max, onChange }: Int
 
   return (
     <div className="min-w-0">
-      <label htmlFor={id} className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+      <label htmlFor={id} className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
         {label}
       </label>
       <input
@@ -40,9 +40,9 @@ function IntegerInput({ label, accessibleLabel, value, min, max, onChange }: Int
         onKeyDown={(event) => {
           if (event.key === 'Enter') event.currentTarget.blur();
         }}
-        className="w-full min-h-11 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-2.5 py-2 text-xl font-mono font-bold tabular-nums text-slate-900 dark:text-white caret-cyan-500 aria-invalid:border-rose-500"
+        className="w-full min-h-11 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-2.5 py-2 text-xl lg:text-2xl font-mono font-bold tabular-nums text-slate-900 dark:text-white caret-cyan-500 aria-invalid:border-rose-500"
       />
-      {invalid && <p id={`${id}-error`} className="mt-1 text-xs text-rose-700 dark:text-rose-300">Enter {min}–{max}.</p>}
+      {invalid && <p id={`${id}-error`} className="mt-1 text-xs lg:text-sm text-rose-700 dark:text-rose-300">Enter {min}–{max}.</p>}
     </div>
   );
 }
@@ -66,7 +66,7 @@ function StepButtons({ label, value, min, max, onChange, step, unit }: Performan
           aria-label={`${delta < 0 ? 'Decrease' : 'Increase'} ${label.toLowerCase()} by ${step} ${unit}`}
           disabled={value !== null && (delta < 0 ? value <= min : value >= max)}
           onClick={() => onChange(Math.min(max, Math.max(min, (value ?? 0) + delta)))}
-          className="min-h-11 min-w-11 px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-mono text-sm font-semibold cursor-pointer hover:border-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="min-h-11 min-w-11 px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-mono text-sm lg:text-base font-semibold cursor-pointer hover:border-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {delta > 0 ? '+' : '−'}{step}{unit === 'seconds' ? 's' : ''}
         </button>
@@ -114,7 +114,7 @@ export function CountInput(props: PerformanceInputProps) {
     <fieldset className="space-y-2 min-w-0">
       <legend className="sr-only">{label}</legend>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="w-28">
+        <div className="w-28 lg:w-40">
           <IntegerInput label={label} value={value} min={min} max={max} onChange={onChange} />
         </div>
         <StepButtons {...props} step={1} unit={label === 'HAMR shuttles' ? 'shuttle' : 'repetition'} />

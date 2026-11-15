@@ -26,7 +26,7 @@ export function ScoreIndicator({ result, detail, pending = false }: ScoreIndicat
 
   if (!pending && (result.exempt || result.isPassFailOnly)) {
     return (
-      <span className={`font-mono text-lg font-bold ${result.exempt
+      <span className={`font-mono text-lg lg:text-xl font-bold ${result.exempt
         ? 'text-slate-500 dark:text-slate-400'
         : result.passedMinimum
           ? 'text-emerald-700 dark:text-emerald-400'
@@ -47,17 +47,17 @@ export function ScoreIndicator({ result, detail, pending = false }: ScoreIndicat
       data-celebrating={celebrating}
     >
       <div className="relative z-10 flex items-baseline justify-end gap-2 whitespace-nowrap">
-        <span className="score-indicator__value inline-block text-3xl sm:text-4xl font-extrabold tracking-tight">
+        <span className="score-indicator__value inline-block text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
           {pending ? '—' : result.earnedPoints.toFixed(1)}
         </span>
-        <span className="text-sm font-bold text-slate-600 dark:text-slate-400">
+        <span className="text-sm lg:text-base font-bold text-slate-600 dark:text-slate-400">
           {result.maxPoints > 0 ? `/ ${result.maxPoints} pts` : 'Not entered'}
         </span>
       </div>
-      <div className="flex min-h-5 items-center justify-end gap-1 text-[11px] font-bold tracking-wide">
+      <div className="flex min-h-5 items-center justify-end gap-1 text-[11px] lg:text-sm font-bold tracking-wide">
         {isMaxed && <><CheckCircle2 className="h-3 w-3" aria-hidden="true" /><span>MAX SCORE</span></>}
       </div>
-      {detail && <p className="text-xs text-slate-600 dark:text-slate-400">{detail}</p>}
+      {detail && <p className="text-xs lg:text-sm text-slate-600 dark:text-slate-400">{detail}</p>}
     </div>
   );
 }

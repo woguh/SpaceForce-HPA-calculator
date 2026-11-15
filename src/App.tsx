@@ -207,14 +207,14 @@ export default function App() {
             e.preventDefault();
             setActiveTab('calculator');
           }}
-          className="text-base font-display font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap shrink-0"
+          className="text-base lg:text-lg font-display font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap shrink-0"
         >
           USSF FITNESS
         </a>
 
         <nav
           aria-label="Workspace Views"
-          className="order-3 sm:order-2 w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 sm:gap-5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-800/60 sm:border-0 pt-2 sm:pt-0"
+          className="order-3 sm:order-2 w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 sm:gap-5 text-xs sm:text-sm lg:text-base font-medium text-slate-600 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-800/60 sm:border-0 pt-2 sm:pt-0"
         >
           {(
             [
@@ -245,7 +245,7 @@ export default function App() {
             aria-label={isAsciiPaused ? 'Resume background animation' : 'Pause background animation'}
             aria-pressed={isAsciiPaused}
             onClick={() => setIsAsciiPaused((p) => !p)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs lg:text-sm font-mono rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
           >
             {isAsciiPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
             <span className="hidden sm:inline">{isAsciiPaused ? 'Play Sky' : 'Pause Sky'}</span>
@@ -255,7 +255,7 @@ export default function App() {
             type="button"
             aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs lg:text-sm font-medium rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
           >
             {theme === 'dark' ? (
               <>
@@ -273,7 +273,7 @@ export default function App() {
       </header>
 
       {/* Focused Center Workspace Floating Over Moving ASCII Sky */}
-      <main className="relative z-10 flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <main className="relative z-10 flex-1 w-full max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Live Composite Score Hero */}
         <section
           ref={summaryRef}
@@ -288,7 +288,7 @@ export default function App() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-xs font-mono text-slate-500 dark:text-slate-400">
+              <div className="text-xs lg:text-sm font-mono text-slate-500 dark:text-slate-400">
                 U.S. SPACE FORCE HPA · PFT SCORE
               </div>
               <div className="flex items-baseline gap-3 mt-1">
@@ -304,14 +304,14 @@ export default function App() {
                 >
                   {summaryPresentation.score === null ? '—' : summaryPresentation.score.toFixed(1)}
                 </span>
-                <span className="text-sm font-mono text-slate-400">/ 100</span>
+                <span className="text-sm lg:text-base font-mono text-slate-400">/ 100</span>
               </div>
             </div>
 
             <div className="sm:text-right space-y-1">
               <div
                 data-testid="overall-pass-status"
-                className={`inline-flex items-center gap-1.5 text-sm font-mono font-bold ${
+                className={`inline-flex items-center gap-1.5 text-sm lg:text-base font-mono font-bold ${
                   summaryGreen
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : summaryFailed ? 'text-rose-600 dark:text-rose-400' : 'text-cyan-700 dark:text-cyan-400'
@@ -324,7 +324,7 @@ export default function App() {
                 ) : null}
                 <span>{summaryStatus}</span>
               </div>
-              <div className="text-xs font-mono text-slate-500 dark:text-slate-400 tabular-nums">
+              <div className="text-xs lg:text-sm font-mono text-slate-500 dark:text-slate-400 tabular-nums">
                 Cardio {completion.cardio ? result.cardio.earnedPoints.toFixed(1) : '—'} · Strength{' '}
                 {completion.strength ? result.strength.earnedPoints.toFixed(1) : '—'} · Core{' '}
                 {completion.core ? result.core.earnedPoints.toFixed(1) : '—'}
@@ -351,7 +351,7 @@ export default function App() {
                 }}
               />
             </div>
-            <div className="grid grid-cols-[1rem_1fr_1fr] gap-3 text-[11px] font-mono text-slate-500 dark:text-slate-400 tabular-nums">
+            <div className="grid grid-cols-[1rem_1fr_1fr] gap-3 text-[11px] lg:text-sm font-mono text-slate-500 dark:text-slate-400 tabular-nums">
               <span>0</span>
               <span className="text-center">75.0 (Health Maintenance Pass)</span>
               <span className="text-right">90.0+ (Fit to Fight)</span>
@@ -369,7 +369,7 @@ export default function App() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Sex */}
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                     Sex
                   </label>
                   <div role="group" aria-label="Sex" className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-900">
@@ -379,7 +379,7 @@ export default function App() {
                         type="button"
                         onClick={() => updateInputs({ sex: s })}
                         aria-pressed={inputs.sex === s}
-                        className={`py-1.5 text-xs font-semibold rounded-md capitalize transition-colors cursor-pointer ${
+                        className={`py-1.5 text-xs lg:text-sm font-semibold rounded-md capitalize transition-colors cursor-pointer ${
                           inputs.sex === s
                             ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -395,7 +395,7 @@ export default function App() {
                 <div>
                   <label
                     htmlFor="age-select"
-                    className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1"
+                    className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1"
                   >
                     Age Bracket
                   </label>
@@ -404,7 +404,7 @@ export default function App() {
                     aria-label="Age Bracket"
                     value={inputs.ageBracket}
                     onChange={(e) => updateInputs({ ageBracket: e.target.value as AgeBracketId })}
-                    className="w-full py-2 px-3 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full py-2 px-3 text-xs lg:text-sm font-semibold rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
                   >
                     {AGE_BRACKETS.map((b) => (
                       <option key={b.id} value={b.id}>
@@ -417,8 +417,8 @@ export default function App() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <div className="min-w-0">
-                  <label htmlFor="installation-select" className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Base / installation</label>
-                  <select id="installation-select" value={inputs.installationId} onChange={(event) => { const base = SPACE_FORCE_INSTALLATIONS.find((item) => item.id === event.target.value); if (base) handleSelectBase(base); }} className="w-full min-h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 text-sm font-medium">
+                  <label htmlFor="installation-select" className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Base / installation</label>
+                  <select id="installation-select" value={inputs.installationId} onChange={(event) => { const base = SPACE_FORCE_INSTALLATIONS.find((item) => item.id === event.target.value); if (base) handleSelectBase(base); }} className="w-full min-h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 text-sm lg:text-base font-medium">
                     {Object.values(ALTITUDE_GROUPS).map((group) => (
                       <optgroup key={group.id} label={group.shortLabel}>
                         {SPACE_FORCE_INSTALLATIONS.filter((base) => base.altitudeGroup === group.id).map((base) => <option key={base.id} value={base.id}>{base.name}</option>)}
@@ -427,14 +427,14 @@ export default function App() {
                   </select>
                 </div>
                 <div className="min-w-0">
-                  <label htmlFor="altitude-select" className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Test altitude group</label>
-                  <select id="altitude-select" value={inputs.isManualAltitude ? inputs.altitudeGroup : 'auto'} onChange={(event) => updateInputs({ altitudeGroup: event.target.value === 'auto' ? activeInstallation.altitudeGroup : event.target.value as AltitudeGroupId, isManualAltitude: event.target.value !== 'auto' })} className="w-full min-h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 text-sm font-medium">
+                  <label htmlFor="altitude-select" className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Test altitude group</label>
+                  <select id="altitude-select" value={inputs.isManualAltitude ? inputs.altitudeGroup : 'auto'} onChange={(event) => updateInputs({ altitudeGroup: event.target.value === 'auto' ? activeInstallation.altitudeGroup : event.target.value as AltitudeGroupId, isManualAltitude: event.target.value !== 'auto' })} className="w-full min-h-11 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 text-sm lg:text-base font-medium">
                     <option value="auto">Use base altitude</option>
                     {Object.values(ALTITUDE_GROUPS).map((group) => <option key={group.id} value={group.id}>{group.shortLabel}</option>)}
                   </select>
                 </div>
               </div>
-              <p className="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400"><MapPin className="h-4 w-4 shrink-0" />{inputs.isManualAltitude ? 'Custom test altitude: ' : `${activeInstallation.geographicElevationFt.toLocaleString()} ft · `}{altitudeSpec.shortLabel}</p>
+              <p className="flex items-start gap-2 text-xs lg:text-sm text-slate-500 dark:text-slate-400"><MapPin className="h-4 w-4 shrink-0" />{inputs.isManualAltitude ? 'Custom test altitude: ' : `${activeInstallation.geographicElevationFt.toLocaleString()} ft · `}{altitudeSpec.shortLabel}</p>
             </section>
 
             {/* 1. Cardiorespiratory Card */}
@@ -442,11 +442,11 @@ export default function App() {
               aria-label="Cardiorespiratory Component"
               className="score-card rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90 backdrop-blur-md p-5 space-y-4"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                    1. Cardiorespiratory
-                  </h2>
+              <div className="space-y-1">
+                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  1. Cardiorespiratory
+                </h2>
+                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
                   <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg">
                     {(
                       [
@@ -460,7 +460,7 @@ export default function App() {
                         type="button"
                         onClick={() => updateInputs({ cardioEvent: ev.id, cardioExempt: false })}
                         aria-pressed={!inputs.cardioExempt && inputs.cardioEvent === ev.id}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                        className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
                           !inputs.cardioExempt && inputs.cardioEvent === ev.id
                             ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -473,7 +473,7 @@ export default function App() {
                       type="button"
                       onClick={() => updateInputs({ cardioExempt: !inputs.cardioExempt })}
                       aria-pressed={inputs.cardioExempt}
-                      className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                      className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
                         inputs.cardioExempt
                           ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -482,13 +482,12 @@ export default function App() {
                       Exempt
                     </button>
                   </div>
+                  <ScoreIndicator result={result.cardio} pending={!completion.cardio} />
                 </div>
-
-                <ScoreIndicator result={result.cardio} pending={!completion.cardio} />
               </div>
 
               {inputs.cardioExempt ? (
-                <div className="text-xs text-slate-500 dark:text-slate-400 py-1">
+                <div className="text-xs lg:text-sm text-slate-500 dark:text-slate-400 py-1">
                   Cardiorespiratory component medically exempt. Composite score is calculated from remaining non-exempt components.
                 </div>
               ) : inputs.cardioEvent === 'hamr' ? (
@@ -507,7 +506,7 @@ export default function App() {
 
               {!inputs.cardioExempt && completion.cardio && result.cardio.altitudeBreakdown && <CardioAltitudeBreakdown breakdown={result.cardio.altitudeBreakdown} altitudeGroup={inputs.altitudeGroup} />}
 
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs font-mono text-slate-500">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs lg:text-sm font-mono text-slate-500">
                 <span>
                   Min Pass: {result.cardio.minimumRequirementLabel} · Max:{' '}
                   {result.cardio.maximumRequirementLabel}
@@ -523,11 +522,11 @@ export default function App() {
               aria-label="Muscular Strength Component"
               className="score-card rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90 backdrop-blur-md p-5 space-y-4"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                    2. Muscular Strength
-                  </h2>
+              <div className="space-y-1">
+                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  2. Muscular Strength
+                </h2>
+                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
                   <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg">
                     {(
                       [
@@ -540,7 +539,7 @@ export default function App() {
                         type="button"
                         onClick={() => updateInputs({ strengthEvent: ev.id, strengthExempt: false })}
                         aria-pressed={!inputs.strengthExempt && inputs.strengthEvent === ev.id}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                        className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
                           !inputs.strengthExempt && inputs.strengthEvent === ev.id
                             ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -553,7 +552,7 @@ export default function App() {
                       type="button"
                       onClick={() => updateInputs({ strengthExempt: !inputs.strengthExempt })}
                       aria-pressed={inputs.strengthExempt}
-                      className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                      className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
                         inputs.strengthExempt
                           ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -562,20 +561,19 @@ export default function App() {
                       Exempt
                     </button>
                   </div>
+                  <ScoreIndicator result={result.strength} pending={!completion.strength} />
                 </div>
-
-                <ScoreIndicator result={result.strength} pending={!completion.strength} />
               </div>
 
               {inputs.strengthExempt ? (
-                <div className="text-xs text-slate-500 dark:text-slate-400 py-1">
+                <div className="text-xs lg:text-sm text-slate-500 dark:text-slate-400 py-1">
                   Muscular strength component medically exempt. Composite score is calculated from remaining non-exempt components.
                 </div>
               ) : (
                 <CountInput label="Strength repetitions" sliderLabel="Strength repetitions slider" value={inputs.strengthReps} min={0} max={100} onChange={(value) => updateInputs({ strengthReps: value })} />
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs font-mono text-slate-500">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs lg:text-sm font-mono text-slate-500">
                 <span>
                   Min Pass: {result.strength.minimumRequirementLabel} · Max:{' '}
                   {result.strength.maximumRequirementLabel}
@@ -591,11 +589,11 @@ export default function App() {
               aria-label="Core Endurance Component"
               className="score-card rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90 backdrop-blur-md p-5 space-y-4"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                    3. Core Endurance
-                  </h2>
+              <div className="space-y-1">
+                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  3. Core Endurance
+                </h2>
+                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
                   <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg">
                     {(
                       [
@@ -609,7 +607,7 @@ export default function App() {
                         type="button"
                         onClick={() => updateInputs({ coreEvent: ev.id, coreExempt: false })}
                         aria-pressed={!inputs.coreExempt && inputs.coreEvent === ev.id}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                        className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
                           !inputs.coreExempt && inputs.coreEvent === ev.id
                             ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -622,7 +620,7 @@ export default function App() {
                       type="button"
                       onClick={() => updateInputs({ coreExempt: !inputs.coreExempt })}
                       aria-pressed={inputs.coreExempt}
-                      className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                      className={`px-1.5 sm:px-2.5 lg:px-3 py-1 lg:py-2 text-[11px] sm:text-xs lg:text-base font-medium lg:font-semibold rounded-md transition-colors cursor-pointer ${
                         inputs.coreExempt
                           ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -631,13 +629,12 @@ export default function App() {
                       Exempt
                     </button>
                   </div>
+                  <ScoreIndicator result={result.core} pending={!completion.core} />
                 </div>
-
-                <ScoreIndicator result={result.core} pending={!completion.core} />
               </div>
 
               {inputs.coreExempt ? (
-                <div className="text-xs text-slate-500 dark:text-slate-400 py-1">
+                <div className="text-xs lg:text-sm text-slate-500 dark:text-slate-400 py-1">
                   Core endurance component medically exempt. Composite score is calculated from remaining non-exempt components.
                 </div>
               ) : inputs.coreEvent === 'plank' ? (
@@ -646,7 +643,7 @@ export default function App() {
                 <CountInput label="Core repetitions" sliderLabel="Core repetitions slider" value={inputs.coreReps} min={0} max={100} onChange={(value) => updateInputs({ coreReps: value })} />
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs font-mono text-slate-500">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs lg:text-sm font-mono text-slate-500">
                 <span>
                   Min Pass: {result.core.minimumRequirementLabel} · Max:{' '}
                   {result.core.maximumRequirementLabel}
@@ -657,7 +654,7 @@ export default function App() {
               </div>
             </section>
 
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-slate-500 pt-1">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs lg:text-sm text-slate-500 pt-1">
               <button
                 type="button"
                 onClick={() => {
@@ -684,9 +681,9 @@ export default function App() {
 
         {activeTab === 'goal' && (summaryAvailable ? <GoalOptimizerPanel inputs={scoringInputs} targetScore={goalTarget} onTargetChange={setGoalTarget} /> : (
           <section className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#0B0F17]/90 p-5 space-y-3">
-            <h2 className="text-base font-bold">{completion.all ? 'Goal Planner needs a scored event' : 'Enter your event results first'}</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">{completion.all ? 'Choose at least one point-scored event to build a goal plan.' : 'Fill in your selected events or mark an exemption to build a goal plan from your actual performance.'}</p>
-            <button type="button" onClick={() => setActiveTab('calculator')} className="min-h-11 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 cursor-pointer">Go to Calculator</button>
+            <h2 className="text-base lg:text-lg font-bold">{completion.all ? 'Goal Planner needs a scored event' : 'Enter your event results first'}</h2>
+            <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400">{completion.all ? 'Choose at least one point-scored event to build a goal plan.' : 'Fill in your selected events or mark an exemption to build a goal plan from your actual performance.'}</p>
+            <button type="button" onClick={() => setActiveTab('calculator')} className="min-h-11 rounded-lg bg-cyan-500 px-4 py-2 text-sm lg:text-base font-semibold text-slate-950 cursor-pointer">Go to Calculator</button>
           </section>
         ))}
 

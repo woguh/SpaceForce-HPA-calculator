@@ -43,18 +43,18 @@ export function CardioAltitudeBreakdown({ breakdown, altitudeGroup }: CardioAlti
       <dl className="grid grid-cols-3 gap-x-3 gap-y-1">
         {steps.map((step, index) => (
           <div key={step.label} className="contents">
-            <dt className="row-start-1 min-w-0 text-[11px] text-slate-600 dark:text-slate-400">{step.label}</dt>
-            <dd className={`row-start-2 min-w-0 flex items-start justify-between gap-1 font-mono text-base font-bold tabular-nums ${index === 2 ? 'text-cyan-700 dark:text-cyan-400' : index === 1 && adjusted ? 'text-amber-700 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100'}`}>
+            <dt className="row-start-1 min-w-0 text-[11px] lg:text-sm text-slate-600 dark:text-slate-400">{step.label}</dt>
+            <dd className={`row-start-2 min-w-0 flex items-start justify-between gap-1 font-mono text-base lg:text-xl font-bold tabular-nums ${index === 2 ? 'text-cyan-700 dark:text-cyan-400' : index === 1 && adjusted ? 'text-amber-700 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100'}`}>
               <span>
                 <span data-testid="altitude-step-value">{step.value}</span>
-                {step.detail && <span className="mt-1 block text-[11px] font-normal text-slate-600 dark:text-slate-400">{step.detail}</span>}
+                {step.detail && <span className="mt-1 block text-[11px] lg:text-sm font-normal text-slate-600 dark:text-slate-400">{step.detail}</span>}
               </span>
               {index < steps.length - 1 && <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden="true" />}
             </dd>
           </div>
         ))}
       </dl>
-      <p className="text-xs text-slate-600 dark:text-slate-400">{ALTITUDE_GROUPS[altitudeGroup].shortLabel.split(' (')[0]} · {note}</p>
+      <p className="text-xs lg:text-sm text-slate-600 dark:text-slate-400">{ALTITUDE_GROUPS[altitudeGroup].shortLabel.split(' (')[0]} · {note}</p>
     </div>
   );
 }
