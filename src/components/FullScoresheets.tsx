@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AGE_BRACKETS, type AgeBracketId, type SexCategory } from '../data/scoringStandards';
 import { HPA_SCORING_RELEASE, SCORING_EVENTS } from '../data/scoringRelease';
 import { formatSecondsToMmSs } from '../utils/calculator';
+import { Selector } from './Selector';
 
 export function FullScoresheets() {
   const [sex, setSex] = useState('all');
@@ -11,14 +12,25 @@ export function FullScoresheets() {
   const ages = AGE_BRACKETS.filter((value) => age === 'all' || age === value.id);
   const events = SCORING_EVENTS.filter((value) => eventId === 'all' || eventId === value.id);
   const count = sexes.length * ages.length * events.length;
-  const selectClass = 'mt-1 block w-full min-h-11 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-2 text-sm lg:text-base';
 
   return <div className="space-y-5">
     <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400">Chart version: <strong>{HPA_SCORING_RELEASE.effectiveDate}</strong>. All scoring rows are included below. Filter to narrow the view; no external document is needed to read the installed scoresheets.</p>
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <label className="text-xs lg:text-sm font-medium">Sex<select aria-label="Scoresheet sex" value={sex} onChange={(e) => setSex(e.target.value)} className={selectClass}><option value="all">All sexes</option><option value="male">Male</option><option value="female">Female</option></select></label>
-      <label className="text-xs lg:text-sm font-medium">Age<select aria-label="Scoresheet age" value={age} onChange={(e) => setAge(e.target.value)} className={selectClass}><option value="all">All ages</option>{AGE_BRACKETS.map((value) => <option key={value.id} value={value.id}>{value.label}</option>)}</select></label>
-      <label className="text-xs lg:text-sm font-medium">Event<select aria-label="Scoresheet event" value={eventId} onChange={(e) => setEventId(e.target.value)} className={selectClass}><option value="all">All events</option>{SCORING_EVENTS.map((value) => <option key={value.id} value={value.id}>{value.label}</option>)}</select></label>
+      <div className="space-y-1">
+        <label htmlFor="scoresheet-sex" className="text-xs lg:text-sm font-medium">Sex</label>
+        <Selector id="scoresheet-sex" label="Scoresheet sex" value={sex} onChange={setSex}
+          options={[{ value: 'all', label: 'All sexes' }, { value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }]} />
+      </div>
+      <div className="space-y-1">
+        <label htmlFor="scoresheet-age" className="text-xs lg:text-sm font-medium">Age</label>
+        <Selector id="scoresheet-age" label="Scoresheet age" value={age} onChange={setAge}
+          options={[{ value: 'all', label: 'All ages' }, ...AGE_BRACKETS.map(bracket => ({ value: bracket.id, label: bracket.label }))]} />
+      </div>
+      <div className="space-y-1">
+        <label htmlFor="scoresheet-event" className="text-xs lg:text-sm font-medium">Event</label>
+        <Selector id="scoresheet-event" label="Scoresheet event" value={eventId} onChange={setEventId}
+          options={[{ value: 'all', label: 'All events' }, ...SCORING_EVENTS.map(event => ({ value: event.id, label: event.label }))]} />
+      </div>
     </div>
     <p role="status" className="text-sm lg:text-base font-semibold">Showing {count} complete {count === 1 ? 'scoresheet' : 'scoresheets'}</p>
     <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400">Run: at or faster than a row’s time. Other events: at or above a row’s result. Missing an event’s minimum earns 0 points and fails its minimum requirement. Cardio rows are shown before altitude adjustment.</p>
