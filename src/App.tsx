@@ -373,23 +373,13 @@ export default function App() {
                   <label className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                     Sex
                   </label>
-                  <div role="group" aria-label="Sex" className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-900">
-                    {(['male', 'female'] as SexCategory[]).map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => updateInputs({ sex: s })}
-                        aria-pressed={inputs.sex === s}
-                        className={`py-1.5 text-xs lg:text-sm font-semibold rounded-md capitalize transition-colors cursor-pointer ${
-                          inputs.sex === s
-                            ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
+                  <SegmentedControl<SexCategory>
+                    label="Sex"
+                    value={inputs.sex}
+                    options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }]}
+                    equalWidth
+                    onChange={sex => updateInputs({ sex })}
+                  />
                 </div>
 
                 {/* Age Group */}

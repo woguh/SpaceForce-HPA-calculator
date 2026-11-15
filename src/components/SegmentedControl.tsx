@@ -9,10 +9,11 @@ interface SegmentedControlProps<T extends string> {
   label: string;
   value: T;
   options: Option<T>[];
+  equalWidth?: boolean;
   onChange: (value: T) => void;
 }
 
-export function SegmentedControl<T extends string>({ label, value, options, onChange }: SegmentedControlProps<T>) {
+export function SegmentedControl<T extends string>({ label, value, options, equalWidth = false, onChange }: SegmentedControlProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef(new Map<T, HTMLButtonElement>());
   const [bounds, setBounds] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
@@ -70,7 +71,7 @@ export function SegmentedControl<T extends string>({ label, value, options, onCh
         aria-pressed={value === option.value}
         tabIndex={value === option.value ? 0 : -1}
         onClick={() => onChange(option.value)}
-        className={`relative rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors sm:px-2.5 sm:text-xs lg:px-3 lg:py-2 lg:text-base lg:font-semibold cursor-pointer ${value === option.value ? option.tone === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+        className={`relative rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors sm:px-2.5 sm:text-xs lg:px-3 lg:py-2 lg:text-base lg:font-semibold cursor-pointer ${equalWidth ? 'min-w-0 flex-1' : ''} ${value === option.value ? option.tone === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
       >
         {option.label}
       </button>)}
