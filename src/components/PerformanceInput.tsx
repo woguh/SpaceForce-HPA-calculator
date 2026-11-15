@@ -1,4 +1,6 @@
 import React, { useId } from 'react';
+import { PerformanceSlider } from './PerformanceSlider';
+import { formatSecondsToMmSs } from '../utils/calculator';
 
 interface IntegerInputProps {
   label: string;
@@ -102,7 +104,7 @@ export function DurationInput({ label, sliderLabel, minutes, seconds, min, max, 
         </div>
         <StepButtons label={label} sliderLabel={sliderLabel} value={value} min={min} max={max} onChange={updateTotal} step={10} unit="seconds" />
       </div>
-      <input type="range" aria-label={sliderLabel} aria-describedby={sliderMax < max ? sliderHintId : undefined} aria-valuetext={value !== null && value > sliderMax ? `Slider at its ${sliderMax / 60} minute limit. Entered time: ${duration}` : duration} min={min} max={sliderMax} step={1} value={Math.min(value ?? min, sliderMax)} onChange={(event) => updateTotal(Number(event.target.value))} onPointerUp={(event) => { if (value === null) updateTotal(Number(event.currentTarget.value)); }} onKeyDown={(event) => { if (event.key === 'Home') updateTotal(min); if (event.key === 'End') updateTotal(sliderMax); }} className="w-full h-11 accent-cyan-500 cursor-pointer" />
+      <PerformanceSlider label={sliderLabel} value={value} min={min} max={sliderMax} describedBy={sliderMax < max ? sliderHintId : undefined} valueText={value !== null && value > sliderMax ? `Slider at its ${sliderMax / 60} minute limit. Entered time: ${duration}` : duration} formatValue={formatSecondsToMmSs} onChange={total => updateTotal(total)} />
       {sliderMax < max && <p id={sliderHintId} className="sr-only">Slider limited to {sliderMax / 60} minutes. Enter longer times using the minutes and seconds fields.</p>}
     </fieldset>
   );
@@ -119,7 +121,7 @@ export function CountInput(props: PerformanceInputProps) {
         </div>
         <StepButtons {...props} step={1} unit={label === 'HAMR shuttles' ? 'shuttle' : 'repetition'} />
       </div>
-      <input type="range" aria-label={sliderLabel} aria-valuetext={value === null ? 'Not entered' : `${value} ${label === 'HAMR shuttles' ? 'shuttles' : 'repetitions'}`} min={min} max={max} step={1} value={value ?? min} onChange={(event) => onChange(Number(event.target.value))} onPointerUp={(event) => { if (value === null) onChange(Number(event.currentTarget.value)); }} onKeyDown={(event) => { if (event.key === 'Home') onChange(min); if (event.key === 'End') onChange(max); }} className="w-full h-11 accent-cyan-500 cursor-pointer" />
+      <PerformanceSlider label={sliderLabel} value={value} min={min} max={max} valueText={value === null ? 'Not entered' : `${value} ${label === 'HAMR shuttles' ? 'shuttles' : 'repetitions'}`} formatValue={count => `${count} ${label === 'HAMR shuttles' ? 'shuttles' : 'reps'}`} onChange={onChange} />
     </fieldset>
   );
 }
