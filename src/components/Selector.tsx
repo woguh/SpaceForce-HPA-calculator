@@ -17,8 +17,10 @@ interface SelectorProps<T extends string> {
   options: SelectorOption<T>[];
   onChange: (value: T) => void;
   placeholder?: string;
+  valueLabel?: string;
   searchLabel?: string;
   searchPlaceholder?: string;
+  largeList?: boolean;
   invalid?: boolean;
   describedBy?: string;
 }
@@ -38,14 +40,14 @@ function nextMatch<T extends string>(options: SelectorOption<T>[], query: string
 
 export function Selector<T extends string>({
   id, label, value, options, onChange, placeholder = 'Choose an option',
-  searchLabel, searchPlaceholder, invalid, describedBy,
+  valueLabel, searchLabel, searchPlaceholder, largeList = false, invalid, describedBy,
 }: SelectorProps<T>) {
   const generatedId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const typeahead = useRef({ text: '', time: 0 });
   const [opening, setOpening] = useState<{ query: string; active: string } | null>(null);
   const selected = options.find(option => option.value === value);
-  const display = value === '' ? placeholder : selected?.label ?? placeholder;
+  const display = value === '' ? placeholder : selected?.label ?? valueLabel ?? placeholder;
   const popupId = `${generatedId}-popup`;
   const valueId = `${generatedId}-value`;
   const dismiss = useCallback((restoreFocus = true) => {
@@ -91,7 +93,7 @@ export function Selector<T extends string>({
     {opening && createPortal(<SelectorPopup
       id={popupId} label={label} value={value} options={options}
       opening={opening} anchor={triggerRef.current!}
-      searchLabel={searchLabel} searchPlaceholder={searchPlaceholder}
+      searchLabel={searchLabel} searchPlaceholder={searchPlaceholder} largeList={largeList}
       onDismiss={dismiss} onSelect={next => { onChange(next); dismiss(); }}
     />, document.body)}
   </>;
@@ -106,12 +108,13 @@ interface PopupProps<T extends string> {
   anchor: HTMLButtonElement;
   searchLabel?: string;
   searchPlaceholder?: string;
+  largeList: boolean;
   onDismiss: (restoreFocus?: boolean) => void;
   onSelect: (value: T) => void;
 }
 
 function SelectorPopup<T extends string>({
-  id, label, value, options, opening, anchor, searchLabel, searchPlaceholder, onDismiss, onSelect,
+  id, label, value, options, opening, anchor, searchLabel, searchPlaceholder, largeList, onDismiss, onSelect,
 }: PopupProps<T>) {
   const panelRef = useRef<HTMLDialogElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -128,7 +131,8 @@ function SelectorPopup<T extends string>({
       ? text.split(' ').some(word => word === token || word.startsWith(token.includes('.') ? token : `${token}.`))
       : text.includes(token));
   });
-  const active = filtered.find(option => option.value === activeValue) ?? filtered[0];
+  const active = filtered.find(option => option.value === activeValue)
+    ?? (query || activeValue === '' ? filtered[0] : undefined);
   const listId = `${id}-list`;
   const activeId = active ? `${id}-option-${filtered.indexOf(active)}` : undefined;
   const groups = [...new Set(filtered.map(option => option.group ?? ''))];
@@ -149,18 +153,18 @@ function SelectorPopup<T extends string>({
       const viewportWidth = viewport?.width ?? window.innerWidth;
       const bottom = window.innerHeight - viewportTop - viewportHeight;
       if (compact) {
-        setPosition({ left: 0, top: 'auto', bottom, width: '100%', maxHeight: Math.min(560, viewportHeight * .85) });
+        setPosition({ left: 0, top: 'auto', bottom, width: '100%', maxHeight: Math.min(largeList ? 680 : 560, viewportHeight * (largeList ? .92 : .85)) });
       } else {
         const rect = anchor.getBoundingClientRect();
         const below = viewportTop + viewportHeight - rect.bottom - 18;
         const above = rect.top - viewportTop - 18;
-        const down = below >= Math.min(300, viewportHeight * .5) || below >= above;
+        const down = below >= (largeList ? 600 : Math.min(300, viewportHeight * .5)) || below >= above;
         const width = Math.min(Math.max(rect.width, 280), viewportWidth - 24);
         setPosition({
           left: Math.max(12, Math.min(rect.left, viewportWidth - width - 12)),
           top: down ? rect.bottom + 6 : 'auto',
           bottom: down ? 'auto' : window.innerHeight - rect.top + 6,
-          width, maxHeight: Math.max(80, Math.min(420, down ? below : above)),
+          width, maxHeight: Math.max(80, Math.min(largeList ? 600 : 420, down ? below : above)),
         });
       }
     };
@@ -188,7 +192,7 @@ function SelectorPopup<T extends string>({
       window.visualViewport?.removeEventListener('scroll', place);
       if (compact) document.documentElement.style.overflow = oldOverflow;
     };
-  }, [compact, anchor, onDismiss]);
+  }, [compact, anchor, largeList, onDismiss]);
 
   useLayoutEffect(() => {
     if (activeId && position.opacity !== 0) document.getElementById(activeId)?.scrollIntoView({ block: 'nearest' });
@@ -210,7 +214,7 @@ function SelectorPopup<T extends string>({
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       if (filtered.length) {
-        const index = active ? filtered.indexOf(active) : -1;
+        const index = active ? filtered.indexOf(active) : event.key === 'ArrowDown' ? -1 : 0;
         setActiveValue(filtered[(index + (event.key === 'ArrowDown' ? 1 : -1) + filtered.length) % filtered.length].value);
       }
     } else if ((event.key === 'Home' || event.key === 'End') && event.target === listRef.current) {

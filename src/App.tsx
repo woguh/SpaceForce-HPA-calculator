@@ -406,7 +406,7 @@ export default function App() {
                   <label htmlFor="installation-select" className="block text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Base / installation</label>
                   <Selector
                     id="installation-select" label="Base / installation" value={inputs.installationId}
-                    searchLabel="Search bases" searchPlaceholder="Search a base or location…"
+                    searchLabel="Search bases" searchPlaceholder="Search a base or location…" largeList
                     options={Object.values(ALTITUDE_GROUPS).flatMap(group => SPACE_FORCE_INSTALLATIONS
                       .filter(base => base.altitudeGroup === group.id)
                       .map(base => ({ value: base.id, label: base.name, group: group.shortLabel, description: base.stateOrCountry, keywords: `${base.id} ${base.majorUnit}` })))}
