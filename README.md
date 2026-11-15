@@ -1,6 +1,6 @@
 # USSF - Human Performance Assessment (HPA) Calculator
 
-<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/49a286ea-5241-4cbd-ae6e-b8f951b47494" />
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/249372ae-0e95-48cb-9235-66f339056b39" />
 
 
 ## Features
