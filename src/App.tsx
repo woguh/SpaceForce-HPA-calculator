@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
+  Github,
   MapPin,
   Moon,
   Pause,
@@ -10,6 +11,7 @@ import {
   Sun,
 } from 'lucide-react';
 import { AsciiOrbitalBanner } from './components/AsciiOrbitalBanner';
+import { AsciiNavigation } from './components/AsciiNavigation';
 import { GoalOptimizerPanel } from './components/GoalOptimizerPanel';
 import { CopyResultsButton } from './components/CopyResultsButton';
 import { MobileScoreSummary } from './components/MobileScoreSummary';
@@ -201,81 +203,53 @@ export default function App() {
         isPaused={isAsciiPaused}
       />
 
-      {/* Minimal Top Bar */}
-      <header className="relative z-20 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-4 gap-y-2 sm:gap-6 px-4 sm:px-8 py-3 sm:py-4 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-[#05070B]/80 backdrop-blur-md">
-        <a
-          href="#top"
-          onClick={(e) => {
-            e.preventDefault();
-            setActiveTab('calculator');
-          }}
-          className="text-base lg:text-lg font-display font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap shrink-0"
-        >
-          USSF FITNESS
-        </a>
-
-        <nav
-          aria-label="Workspace Views"
-          className="order-3 sm:order-2 w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 sm:gap-5 text-xs sm:text-sm lg:text-base font-medium text-slate-600 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-800/60 sm:border-0 pt-2 sm:pt-0"
-        >
-          {(
-            [
-              { id: 'calculator', label: 'Calculator' },
-              { id: 'goal', label: 'Goal Planner' },
-              { id: 'standards', label: 'Standards' },
-            ] as { id: ActiveTab; label: string }[]
-          ).map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setActiveTab(t.id)}
-              aria-pressed={activeTab === t.id}
-              className={`py-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer border-b-2 ${
-                activeTab === t.id
-                  ? 'border-cyan-500 text-slate-900 dark:text-white font-semibold'
-                  : 'border-transparent hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="order-2 sm:order-3 flex items-center gap-2 shrink-0">
+      <div className="relative z-20 flex justify-end px-4 sm:px-8 pt-3 sm:pt-4">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             aria-label={isAsciiPaused ? 'Resume background animation' : 'Pause background animation'}
             aria-pressed={isAsciiPaused}
             onClick={() => setIsAsciiPaused((p) => !p)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs lg:text-sm font-mono rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+            title={isAsciiPaused ? 'Resume sky' : 'Pause sky'}
+            className="inline-flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 transition-colors cursor-pointer shrink-0"
           >
-            {isAsciiPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
-            <span className="hidden sm:inline">{isAsciiPaused ? 'Play Sky' : 'Pause Sky'}</span>
+            {isAsciiPaused ? <Play className="w-4 h-4" aria-hidden="true" /> : <Pause className="w-4 h-4" aria-hidden="true" />}
           </button>
 
           <button
             type="button"
             aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs lg:text-sm font-medium rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+            className="inline-flex h-11 w-24 sm:h-10 sm:w-24 items-center justify-center text-sm font-medium leading-none rounded-[14px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
           >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span>Light</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-3.5 h-3.5 text-slate-700" />
-                <span>Dark</span>
-              </>
-            )}
+            <span className="inline-flex items-center justify-center gap-2">
+              {theme === 'dark'
+                ? <Sun className="h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                : <Moon className="h-4 w-4 shrink-0 text-slate-700" aria-hidden="true" />}
+              <span className="block leading-none">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </span>
           </button>
+
+          <a
+            href="https://github.com/woguh/SpaceForce-HPA-calculator"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View source on GitHub (opens in a new tab)"
+            title="View source on GitHub"
+            className="inline-flex h-11 w-11 sm:h-10 sm:w-10 pointer-coarse:min-h-11 pointer-coarse:min-w-11 items-center justify-center rounded-[50%] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 transition-colors shrink-0"
+          >
+            <Github className="h-[18px] w-[18px]" aria-hidden="true" />
+          </a>
         </div>
-      </header>
+      </div>
 
       {/* Focused Center Workspace Floating Over Moving ASCII Sky */}
-      <main className="relative z-10 flex-1 w-full max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <main className="relative z-10 flex-1 w-full max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 pt-2 sm:pt-3 pb-8 space-y-6">
+        <AsciiNavigation<ActiveTab>
+          views={[{ id: 'calculator', label: 'Calculator' }, { id: 'goal', label: 'Goal Planner' }, { id: 'standards', label: 'Standards' }]}
+          activeView={activeTab}
+          onChange={setActiveTab}
+        />
         {/* Live Composite Score Hero */}
         <section
           ref={summaryRef}
