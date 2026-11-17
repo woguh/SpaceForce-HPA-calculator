@@ -49,7 +49,9 @@
 }
 
 .score-number {
-  --number-flow-mask-height: .08em;
+  /* Keep the roll mask but stop NumberFlow from growing the line box. */
+  --number-flow-mask-height: 0.15em;
+  margin-block: -0.15em;
   --number-flow-mask-width: .25em;
   font-variant-numeric: tabular-nums;
   vertical-align: baseline;
