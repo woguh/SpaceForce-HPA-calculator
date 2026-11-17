@@ -23,7 +23,6 @@ import { SegmentedControl } from './components/SegmentedControl';
 import { Selector } from './components/Selector';
 import { ScoreIndicator } from './components/ScoreIndicator';
 import { ScoreNumber } from './components/ScoreNumber';
-import { Toaster, toast } from '@/components/ui/toast';
 import { CardioAltitudeBreakdown } from './components/CardioAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
 import { assessmentEntryCompletion, assessmentEntrySummary, assessmentInputsForEntry, EMPTY_PERFORMANCE, profileSettingsForEntry, type AssessmentEntry } from './utils/assessmentEntry';
@@ -187,7 +186,6 @@ export default function App() {
   return (
     <div className="calculator-app relative min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#05070B] text-slate-900 dark:text-slate-100 transition-colors duration-150">
       <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{scoreAnnouncement}</p>
-      <Toaster position="bottom-center" duration={4000} />
       <h1 className="sr-only">USSF HPA and PFT calculator</h1>
       <MobileScoreSummary
         summaryRef={summaryRef}
@@ -554,23 +552,9 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => {
-                  // Snapshot for Undo; the reset itself is unchanged.
-                  const previousInputs = inputs;
-                  const previousWaist = waistMeasurements;
                   setInputs(DEFAULT_INPUTS);
                   setWaistMeasurements({ waist: '', height: '' });
                   setWaistResetToken((token) => token + 1);
-                  toast('> INPUTS RESET', {
-                    description: 'Event results and measurements cleared.',
-                    action: {
-                      label: '[ UNDO ]',
-                      onClick: () => {
-                        setInputs(previousInputs);
-                        setWaistMeasurements(previousWaist);
-                        setWaistResetToken((token) => token + 1);
-                      },
-                    },
-                  });
                 }}
                 className="press inline-flex min-h-8 items-center gap-1 hover:text-slate-900 dark:hover:text-white cursor-pointer"
               >
