@@ -3,6 +3,9 @@ import { CheckCircle2, ChevronDown, CircleAlert } from 'lucide-react';
 import { HeightInput } from './HeightInput';
 import { WAIST_RATIO_FAIL_THRESHOLD } from '../data/scoringRelease';
 import { calculateWaistRatio, type WaistMeasurements } from '../utils/waistRatio';
+import { useReducedMotion } from 'motion/react';
+import * as m from 'motion/react-m';
+import { ScoreNumber } from './ScoreNumber';
 
 const EMPTY_MEASUREMENTS: WaistMeasurements = { waist: '', height: '' };
 
@@ -15,6 +18,7 @@ export function WaistRatioCard({ measurements, onChange }: WaistRatioCardProps) 
   const id = useId();
   const [expanded, setExpanded] = useState(true);
   const [announcement, setAnnouncement] = useState('');
+  const reducedMotion = useReducedMotion();
   const result = calculateWaistRatio(measurements);
   const passed = result.status === 'pass';
   const failed = result.status === 'fail';
@@ -63,14 +67,17 @@ export function WaistRatioCard({ measurements, onChange }: WaistRatioCardProps) 
               {failed && <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />}
               {label}
             </span>
-            <ChevronDown className={`h-4 w-4 text-zinc-600 dark:text-zinc-300 ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+            <m.span initial={false} animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: reducedMotion ? 0 : .2 }} className="inline-flex shrink-0" aria-hidden="true">
+              <ChevronDown className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+            </m.span>
           </span>
         </button>
       </h2>
 
       <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</p>
 
-      <div id={`${id}-panel`} hidden={!expanded} className="px-5 pb-5 space-y-4">
+      <m.div id={`${id}-panel`} initial={false} animate={{ height: expanded ? 'auto' : 0, opacity: expanded ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : .24 }} aria-hidden={!expanded} inert={!expanded} className="overflow-hidden">
+        <div className="px-5 pb-5 space-y-4">
         <p className={`text-sm lg:text-base ${passed ? 'text-emerald-900 dark:text-emerald-100' : failed ? 'text-rose-900 dark:text-rose-100' : 'text-zinc-700 dark:text-zinc-300'}`}>
           This check does not change your fitness point total.
         </p>
@@ -102,7 +109,7 @@ export function WaistRatioCard({ measurements, onChange }: WaistRatioCardProps) 
           <div>
             <p className={`text-xs lg:text-sm ${passed ? 'text-emerald-800 dark:text-emerald-200' : failed ? 'text-rose-800 dark:text-rose-200' : 'text-zinc-600 dark:text-zinc-400'}`}>Waist ÷ height</p>
             <p data-testid="waist-ratio-value" className={`mt-1 text-3xl font-mono font-bold tabular-nums ${passed ? 'text-emerald-800 dark:text-emerald-200' : failed ? 'text-rose-800 dark:text-rose-200' : 'text-zinc-700 dark:text-zinc-300'}`}>
-              {result.ratio === null ? '—' : result.ratio.toFixed(2)}
+              <ScoreNumber value={result.ratio} decimals={2} />
             </p>
           </div>
           <button
@@ -116,7 +123,8 @@ export function WaistRatioCard({ measurements, onChange }: WaistRatioCardProps) 
           PASS: {(WAIST_RATIO_FAIL_THRESHOLD - 0.01).toFixed(2)} or lower · FAIL: {WAIST_RATIO_FAIL_THRESHOLD.toFixed(2)} or higher.<br />
           Ratio rounded to two decimals to match the chart.
         </p>
-      </div>
+        </div>
+      </m.div>
     </section>
   );
 }

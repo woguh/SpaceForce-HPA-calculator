@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import type { ComponentScoreResult } from '../utils/calculator';
+import { ScoreNumber } from './ScoreNumber';
 
 interface ScoreIndicatorProps {
   result: ComponentScoreResult;
@@ -48,7 +49,7 @@ export function ScoreIndicator({ result, detail, pending = false }: ScoreIndicat
     >
       <div className="relative z-10 flex items-baseline justify-end gap-2 whitespace-nowrap">
         <span className="score-indicator__value inline-block text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-          {pending ? '—' : result.earnedPoints.toFixed(1)}
+          <ScoreNumber value={pending ? null : result.earnedPoints} />
         </span>
         <span className="text-sm lg:text-base font-bold text-slate-600 dark:text-slate-400">
           {result.maxPoints > 0 ? `/ ${result.maxPoints} pts` : 'Not entered'}

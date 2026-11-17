@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence } from 'motion/react';
+import * as m from 'motion/react-m';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -20,6 +22,7 @@ import { ScoringTablesReference } from './components/ScoringTablesReference';
 import { SegmentedControl } from './components/SegmentedControl';
 import { Selector } from './components/Selector';
 import { ScoreIndicator } from './components/ScoreIndicator';
+import { ScoreNumber } from './components/ScoreNumber';
 import { CardioAltitudeBreakdown } from './components/CardioAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
 import { assessmentEntryCompletion, assessmentEntrySummary, assessmentInputsForEntry, EMPTY_PERFORMANCE, profileSettingsForEntry, type AssessmentEntry } from './utils/assessmentEntry';
@@ -278,7 +281,7 @@ export default function App() {
                         : 'text-cyan-700 dark:text-cyan-400'
                   }`}
                 >
-                  {summaryPresentation.score === null ? '—' : summaryPresentation.score.toFixed(1)}
+                  <ScoreNumber value={summaryPresentation.score} />
                 </span>
                 <span className="text-sm lg:text-base font-mono text-slate-400">/ 100</span>
               </div>
@@ -316,14 +319,15 @@ export default function App() {
           {/* Clean Progress Bar — Turns Green at 75+ */}
           <div className="mt-4 space-y-1.5">
             <div className="h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
-              <div
-                className={`h-full transition-transform duration-150 origin-left ${
+              <m.div
+                initial={false}
+                className={`h-full origin-left ${
                   summaryGreen
                     ? 'bg-emerald-500'
                     : summaryFailed ? 'bg-rose-500' : 'bg-cyan-500'
                 }`}
-                style={{
-                  transform: `scaleX(${Math.min(1, Math.max(0, (summaryPresentation.score ?? 0) / 100))})`,
+                animate={{
+                  scaleX: Math.min(1, Math.max(0, (summaryPresentation.score ?? 0) / 100)),
                 }}
               />
             </div>
@@ -335,6 +339,8 @@ export default function App() {
           </div>
         </section>
 
+        <AnimatePresence initial={false}>
+          <m.div key={activeTab} className="space-y-6" initial={{ opacity: .82 }} animate={{ opacity: 1 }} transition={{ duration: .15 }}>
         {activeTab === 'calculator' && (
           <>
             {/* Compact Profile & Base Selector Card */}
@@ -575,6 +581,8 @@ export default function App() {
             activeAgeBracket={inputs.ageBracket}
           />
         )}
+          </m.div>
+        </AnimatePresence>
       </main>
     </div>
   );

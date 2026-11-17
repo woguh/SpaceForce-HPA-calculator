@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { CheckCircle2, Target } from 'lucide-react';
 import { AssessmentInputs, GoalComponentRecommendation, calculateTargetGoalPlan } from '../utils/calculator';
+import { ScoreNumber } from './ScoreNumber';
 
 interface GoalOptimizerPanelProps {
   inputs: AssessmentInputs;
@@ -51,12 +52,12 @@ export const GoalOptimizerPanel: React.FC<GoalOptimizerPanelProps> = ({ inputs, 
           <div className="text-xs lg:text-sm text-slate-500 dark:text-slate-400">
             Target Composite:{' '}
             <strong className="text-cyan-600 dark:text-cyan-400 tabular-nums">
-              {plan.targetCompositeScore.toFixed(1)} pts
+              <ScoreNumber value={plan.targetCompositeScore} /> pts
             </strong>
           </div>
           <div className="text-[11px] lg:text-sm text-slate-500 dark:text-slate-400 tabular-nums">
-            Current: {plan.currentCompositeScore.toFixed(1)} pts ·{' '}
-            {plan.alreadyAchieved ? 'Target Met' : plan.pointsGap > 0 ? `+${plan.pointsGap.toFixed(1)} pts needed` : 'Event minimum not met'}
+            Current: <ScoreNumber value={plan.currentCompositeScore} /> pts ·{' '}
+            {plan.alreadyAchieved ? 'Target Met' : plan.pointsGap > 0 ? <>+<ScoreNumber value={plan.pointsGap} /> pts needed</> : 'Event minimum not met'}
           </div>
         </div>
       </div>
@@ -110,7 +111,7 @@ export const GoalOptimizerPanel: React.FC<GoalOptimizerPanelProps> = ({ inputs, 
             className="min-w-0 flex-1 accent-cyan-500 cursor-pointer"
           />
           <span className="font-mono text-xs lg:text-sm font-bold text-slate-900 dark:text-white w-16 lg:w-24 lg:shrink-0 lg:whitespace-nowrap text-right tabular-nums">
-            {targetScore.toFixed(1)} pts
+            <ScoreNumber value={targetScore} /> pts
           </span>
         </div>
       </div>
