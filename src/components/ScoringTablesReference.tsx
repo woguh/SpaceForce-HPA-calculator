@@ -8,7 +8,16 @@ import {
 } from '../data/scoringStandards';
 import { FullScoresheets } from './FullScoresheets';
 import { StandardsDataReference } from './StandardsDataReference';
+import { SegmentedControl } from './SegmentedControl';
 import { WAIST_RATIO_FAIL_THRESHOLD } from '../data/scoringRelease';
+
+const REFERENCE_VIEWS = [
+  { value: 'DEMOGRAPHIC', label: 'Event scoresheets' },
+  { value: 'ALTITUDE', label: 'Altitude & walk' },
+  { value: 'WHTR', label: 'Waist ratio' },
+  { value: 'SOURCES', label: 'Rules & complete data' },
+] as const;
+type ReferenceView = (typeof REFERENCE_VIEWS)[number]['value'];
 
 interface ScoringTablesReferenceProps {
   activeSex: SexCategory;
@@ -19,15 +28,13 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
   activeSex,
   activeAgeBracket,
 }) => {
-  const [subTab, setSubTab] = useState<'DEMOGRAPHIC' | 'ALTITUDE' | 'WHTR' | 'SOURCES'>(
-    'DEMOGRAPHIC'
-  );
+  const [subTab, setSubTab] = useState<ReferenceView>('DEMOGRAPHIC');
 
   return (
     <section
       id="scoring-tables-section"
       aria-labelledby="scoring-tables-heading"
-      className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D111A] p-5 space-y-5"
+      className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D111A] p-5 space-y-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -43,35 +50,13 @@ export const ScoringTablesReference: React.FC<ScoringTablesReferenceProps> = ({
           </p>
         </div>
 
-        {/* Sub-navigation Tabs */}
-        <div
-          role="group"
-          aria-label="Reference Table Views"
-          className="inline-flex flex-wrap items-center gap-1 p-1 rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
-        >
-          {(
-            [
-              { id: 'DEMOGRAPHIC', label: 'Event scoresheets' },
-              { id: 'ALTITUDE', label: 'Altitude & walk' },
-              { id: 'WHTR', label: 'Waist ratio' },
-              { id: 'SOURCES', label: 'Rules & complete data' },
-            ] as const
-          ).map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              aria-pressed={subTab === t.id}
-              onClick={() => setSubTab(t.id)}
-              className={`px-2.5 py-1 text-xs lg:text-sm font-medium rounded transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
-                subTab === t.id
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl<ReferenceView>
+          label="Reference Table Views"
+          value={subTab}
+          options={REFERENCE_VIEWS}
+          variant="reference"
+          onChange={setSubTab}
+        />
       </div>
 
       {subTab === 'DEMOGRAPHIC' && <FullScoresheets />}

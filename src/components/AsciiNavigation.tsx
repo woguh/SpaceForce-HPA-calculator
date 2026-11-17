@@ -26,7 +26,7 @@ function wordArt(label: string) {
 }
 
 interface AsciiNavigationProps<T extends string> {
-  views: { id: T; label: string }[];
+  views: readonly { id: T; label: string }[];
   activeView: T;
   onChange: (view: T) => void;
 }
@@ -43,7 +43,7 @@ export function AsciiNavigation<T extends string>({ views, activeView, onChange 
     >
       <pre aria-hidden="true" className="hidden select-none font-mono text-[7px] md:text-[8px] lg:text-[9px] font-semibold leading-[1.1] sm:block">{wordArt(view.label)}</pre>
       <span aria-hidden="true" className="block whitespace-pre select-none text-[10px] min-[375px]:text-xs leading-[1.3] sm:hidden">{`[ ${view.label} ]\n${'_'.repeat(view.label.length + 4)}`}</span>
-      {activeView === view.id && <m.span aria-hidden="true" layoutId="ascii-nav-underline" transition={SPRING} className="phosphor-glow pointer-events-none absolute inset-x-0 -bottom-0.5 hidden h-0.5 rounded-full bg-cyan-500 dark:bg-cyan-400 sm:block" />}
+      {activeView === view.id && <m.span aria-hidden="true" layoutId="ascii-nav-underline" transition={SPRING} className="phosphor-glow pointer-events-none absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />}
     </button>)}
   </nav>;
 }

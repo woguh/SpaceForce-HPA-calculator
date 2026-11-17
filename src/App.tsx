@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence } from 'motion/react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as m from 'motion/react-m';
 import {
   AlertTriangle,
@@ -67,7 +66,12 @@ const DEFAULT_INPUTS: AssessmentEntry = {
   ...EMPTY_PERFORMANCE,
 };
 
-type ActiveTab = 'calculator' | 'goal' | 'standards';
+const WORKSPACE_VIEWS = [
+  { id: 'calculator', label: 'Calculator' },
+  { id: 'goal', label: 'Goal Planner' },
+  { id: 'standards', label: 'Standards' },
+] as const;
+type ActiveTab = (typeof WORKSPACE_VIEWS)[number]['id'];
 
 export default function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -98,9 +102,23 @@ export default function App() {
 
   const [goalTarget, setGoalTarget] = useState(90);
   const [activeTab, setActiveTab] = useState<ActiveTab>('calculator');
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const focusWorkspace = useRef(false);
   const [isAsciiPaused, setIsAsciiPaused] = useState(false);
   const [waistResetToken, setWaistResetToken] = useState(0);
   const [waistMeasurements, setWaistMeasurements] = useState<WaistMeasurements>({ waist: '', height: '' });
+
+  useLayoutEffect(() => {
+    if (!focusWorkspace.current) return;
+    focusWorkspace.current = false;
+    workspaceRef.current?.focus({ preventScroll: true });
+    workspaceRef.current?.scrollIntoView({ block: 'start' });
+  }, [activeTab]);
+
+  const openWorkspace = (tab: ActiveTab) => {
+    focusWorkspace.current = true;
+    setActiveTab(tab);
+  };
 
   useEffect(() => {
     const root = document.documentElement;
@@ -214,7 +232,7 @@ export default function App() {
             aria-pressed={isAsciiPaused}
             onClick={() => setIsAsciiPaused((p) => !p)}
             title={isAsciiPaused ? 'Resume sky' : 'Pause sky'}
-            className="inline-flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 transition-colors cursor-pointer shrink-0"
+            className="press inline-flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 cursor-pointer shrink-0"
           >
             {isAsciiPaused ? <Play className="w-4 h-4" aria-hidden="true" /> : <Pause className="w-4 h-4" aria-hidden="true" />}
           </button>
@@ -223,7 +241,7 @@ export default function App() {
             type="button"
             aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-            className="inline-flex h-11 w-24 sm:h-10 sm:w-24 items-center justify-center text-sm font-medium leading-none rounded-[14px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 hover:border-cyan-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+            className="press inline-flex h-11 w-24 sm:h-10 sm:w-24 items-center justify-center text-sm font-medium leading-none rounded-[14px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 hover:border-cyan-500 cursor-pointer whitespace-nowrap shrink-0"
           >
             <span className="inline-flex items-center justify-center gap-2">
               {theme === 'dark'
@@ -239,7 +257,7 @@ export default function App() {
             rel="noopener noreferrer"
             aria-label="View source on GitHub (opens in a new tab)"
             title="View source on GitHub"
-            className="inline-flex h-11 w-11 sm:h-10 sm:w-10 pointer-coarse:min-h-11 pointer-coarse:min-w-11 items-center justify-center rounded-[50%] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 transition-colors shrink-0"
+            className="press inline-flex h-11 w-11 sm:h-10 sm:w-10 pointer-coarse:min-h-11 pointer-coarse:min-w-11 items-center justify-center rounded-[50%] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 shrink-0"
           >
             <Github className="h-[18px] w-[18px]" aria-hidden="true" />
           </a>
@@ -249,7 +267,7 @@ export default function App() {
       {/* Focused Center Workspace Floating Over Moving ASCII Sky */}
       <main className="relative z-10 flex-1 w-full max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 pt-2 sm:pt-3 pb-8 space-y-6">
         <AsciiNavigation<ActiveTab>
-          views={[{ id: 'calculator', label: 'Calculator' }, { id: 'goal', label: 'Goal Planner' }, { id: 'standards', label: 'Standards' }]}
+          views={WORKSPACE_VIEWS}
           activeView={activeTab}
           onChange={setActiveTab}
         />
@@ -318,7 +336,7 @@ export default function App() {
 
           {/* Clean Progress Bar — Turns Green at 75+ */}
           <div className="mt-4 space-y-1.5">
-            <div className="h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
+            <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-900">
               <m.div
                 initial={false}
                 className={`h-full origin-left ${
@@ -330,6 +348,7 @@ export default function App() {
                   scaleX: Math.min(1, Math.max(0, (summaryPresentation.score ?? 0) / 100)),
                 }}
               />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-3/4 w-0.5 -translate-x-1/2 bg-white ring-1 ring-slate-950/80" />
             </div>
             <div className="grid grid-cols-[1rem_1fr_1fr] gap-3 text-[11px] lg:text-sm font-mono text-slate-500 dark:text-slate-400 tabular-nums">
               <span>0</span>
@@ -339,14 +358,14 @@ export default function App() {
           </div>
         </section>
 
-        <AnimatePresence mode="wait" initial={false}>
-          <m.div
-            key={activeTab}
-            className="space-y-6"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } }}
-            exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: [0.4, 0, 0.2, 1] } }}
-          >
+        <div
+          key={activeTab}
+          ref={workspaceRef}
+          role="region"
+          aria-label={WORKSPACE_VIEWS.find(view => view.id === activeTab)?.label}
+          tabIndex={-1}
+          className="workspace-panel scroll-mt-4 space-y-6 focus:outline-none"
+        >
         {activeTab === 'calculator' && (
           <>
             {/* Compact Profile & Base Selector Card */}
@@ -563,7 +582,7 @@ export default function App() {
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab('goal')}
+                onClick={() => openWorkspace('goal')}
                 className="press min-h-8 font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
               >
                 Need a target score plan? Open Goal Planner →
@@ -577,7 +596,7 @@ export default function App() {
           <section className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#0B0F17]/90 p-5 space-y-3">
             <h2 className="text-base lg:text-lg font-bold">{completion.all ? 'Goal Planner needs a scored event' : 'Enter your event results first'}</h2>
             <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400">{completion.all ? 'Choose at least one point-scored event to build a goal plan.' : 'Fill in your selected events or mark an exemption to build a goal plan from your actual performance.'}</p>
-            <button type="button" onClick={() => setActiveTab('calculator')} className="min-h-11 rounded-lg bg-cyan-500 px-4 py-2 text-sm lg:text-base font-semibold text-slate-950 cursor-pointer">Go to Calculator</button>
+            <button type="button" onClick={() => openWorkspace('calculator')} className="press min-h-11 rounded-lg bg-cyan-500 px-4 py-2 text-sm lg:text-base font-semibold text-slate-950 hover:bg-cyan-400 cursor-pointer">Go to Calculator</button>
           </section>
         ))}
 
@@ -587,8 +606,7 @@ export default function App() {
             activeAgeBracket={inputs.ageBracket}
           />
         )}
-          </m.div>
-        </AnimatePresence>
+        </div>
       </main>
     </div>
   );

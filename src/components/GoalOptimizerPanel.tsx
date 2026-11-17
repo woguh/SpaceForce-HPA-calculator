@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { CheckCircle2, Target } from 'lucide-react';
 import { AssessmentInputs, GoalComponentRecommendation, calculateTargetGoalPlan } from '../utils/calculator';
 import { ScoreNumber } from './ScoreNumber';
+import { PerformanceSlider } from './PerformanceSlider';
 
 interface GoalOptimizerPanelProps {
   inputs: AssessmentInputs;
@@ -32,7 +33,7 @@ export const GoalOptimizerPanel: React.FC<GoalOptimizerPanelProps> = ({ inputs, 
     <section
       id="goal-calculator-section"
       aria-labelledby="goal-calculator-heading"
-      className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D111A] p-5"
+      className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D111A] p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
@@ -48,7 +49,7 @@ export const GoalOptimizerPanel: React.FC<GoalOptimizerPanelProps> = ({ inputs, 
           </p>
         </div>
 
-        <div role="status" aria-live="polite" aria-atomic="true" className="font-mono text-right">
+        <div role="status" aria-live="polite" aria-atomic="true" className="font-mono sm:text-right">
           <div className="text-xs lg:text-sm text-slate-500 dark:text-slate-400">
             Target Composite:{' '}
             <strong className="text-cyan-600 dark:text-cyan-400 tabular-nums">
@@ -77,7 +78,7 @@ export const GoalOptimizerPanel: React.FC<GoalOptimizerPanelProps> = ({ inputs, 
                 type="button"
                 aria-pressed={active}
                 onClick={() => onTargetChange(preset)}
-                className={`px-1 py-1.5 rounded text-[11px] lg:text-sm sm:text-xs font-mono font-medium border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`press min-h-9 rounded-md border px-1 py-1.5 text-[11px] sm:text-xs lg:text-sm font-mono font-medium cursor-pointer whitespace-nowrap shrink-0 ${
                   active
                     ? 'border-cyan-500 bg-cyan-500/15 text-slate-900 dark:text-white font-bold'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:border-slate-300'
@@ -92,27 +93,26 @@ export const GoalOptimizerPanel: React.FC<GoalOptimizerPanelProps> = ({ inputs, 
         <p className="text-xs lg:text-sm text-slate-600 dark:text-slate-400">
           {targetScore === 75 ? '75 points: Health Maintenance passing threshold.' : targetScore === 90 ? '90 points: Fit to Fight threshold.' : `${targetScore.toFixed(1)} points: your personal score target.`} All event minimums must also be met.
         </p>
-        <div className="flex items-center gap-3">
-          <label
-            htmlFor="target-score-slider"
-            className="text-xs lg:text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap"
-          >
-            Custom Target:
-          </label>
-          <input
+        <div>
+          <div className="flex items-baseline justify-between gap-3">
+            <label htmlFor="target-score-slider" className="text-xs lg:text-sm font-medium text-slate-600 dark:text-slate-400">
+              Custom Target
+            </label>
+            <span className="font-mono text-xs lg:text-sm font-bold text-slate-900 dark:text-white tabular-nums">
+              <ScoreNumber value={targetScore} /> pts
+            </span>
+          </div>
+          <PerformanceSlider
             id="target-score-slider"
-            type="range"
+            label="Custom Target"
             min={75}
             max={100}
             step={0.5}
             value={targetScore}
-            aria-valuetext={`${targetScore.toFixed(1)} points`}
-            onChange={(e) => onTargetChange(Number(e.target.value))}
-            className="min-w-0 flex-1 accent-cyan-500 cursor-pointer"
+            valueText={`${targetScore.toFixed(1)} points`}
+            formatValue={value => `${value.toFixed(1)} pts`}
+            onChange={onTargetChange}
           />
-          <span className="font-mono text-xs lg:text-sm font-bold text-slate-900 dark:text-white w-16 lg:w-24 lg:shrink-0 lg:whitespace-nowrap text-right tabular-nums">
-            <ScoreNumber value={targetScore} /> pts
-          </span>
         </div>
       </div>
 
