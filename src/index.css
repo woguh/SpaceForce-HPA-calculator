@@ -270,3 +270,18 @@
   .selector-trigger, .selector-option { font-size: 16px; }
   .selector-option { min-height: 48px; }
 }
+
+.height-wheel [data-rwp] { touch-action: none; }
+.height-wheel .height-wheel-option { color: #475569; font-size: 18px; }
+.height-wheel .height-wheel-highlight {
+  border-radius: 8px;
+  border-top: 1px solid #67e8f9;
+  border-bottom: 1px solid #67e8f9;
+  background: #ecfeff;
+}
+.height-wheel .height-wheel-selected { color: #155e75; font-size: 22px; font-weight: 600; }
+.height-wheel [data-rwp]:focus-visible .height-wheel-highlight { outline: 2px solid #0891b2; outline-offset: -2px; }
+.dark .height-wheel .height-wheel-option { color: #94a3b8; }
+.dark .height-wheel .height-wheel-highlight { border-color: #155e75; background: #102e3d; }
+.dark .height-wheel .height-wheel-selected { color: #a5f3fc; }
+.dark .height-wheel [data-rwp]:focus-visible .height-wheel-highlight { outline-color: #22d3ee; }

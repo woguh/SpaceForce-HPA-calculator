@@ -1,4 +1,4 @@
-import { useCallback, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { useCallback, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 
@@ -8,6 +8,10 @@ export interface SelectorOption<T extends string = string> {
   group?: string;
   description?: string;
   keywords?: string;
+}
+
+interface MobileContentControls<T extends string> {
+  onSelect: (value: T) => void;
 }
 
 interface SelectorProps<T extends string> {
@@ -23,6 +27,7 @@ interface SelectorProps<T extends string> {
   largeList?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  renderMobileContent?: (controls: MobileContentControls<T>) => ReactNode;
 }
 
 function normalize(text: string) {
@@ -40,7 +45,7 @@ function nextMatch<T extends string>(options: SelectorOption<T>[], query: string
 
 export function Selector<T extends string>({
   id, label, value, options, onChange, placeholder = 'Choose an option',
-  valueLabel, searchLabel, searchPlaceholder, largeList = false, invalid, describedBy,
+  valueLabel, searchLabel, searchPlaceholder, largeList = false, invalid, describedBy, renderMobileContent,
 }: SelectorProps<T>) {
   const generatedId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -94,6 +99,7 @@ export function Selector<T extends string>({
       id={popupId} label={label} value={value} options={options}
       opening={opening} anchor={triggerRef.current!}
       searchLabel={searchLabel} searchPlaceholder={searchPlaceholder} largeList={largeList}
+      renderMobileContent={renderMobileContent}
       onDismiss={dismiss} onSelect={next => { onChange(next); dismiss(); }}
     />, document.body)}
   </>;
@@ -111,16 +117,18 @@ interface PopupProps<T extends string> {
   largeList: boolean;
   onDismiss: (restoreFocus?: boolean) => void;
   onSelect: (value: T) => void;
+  renderMobileContent?: (controls: MobileContentControls<T>) => ReactNode;
 }
 
 function SelectorPopup<T extends string>({
-  id, label, value, options, opening, anchor, searchLabel, searchPlaceholder, largeList, onDismiss, onSelect,
+  id, label, value, options, opening, anchor, searchLabel, searchPlaceholder, largeList, onDismiss, onSelect, renderMobileContent,
 }: PopupProps<T>) {
   const panelRef = useRef<HTMLDialogElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const typeahead = useRef({ text: '', time: 0 });
   const [compact, setCompact] = useState(() => window.matchMedia('(max-width: 639px)').matches);
+  const customMobileContent = compact && Boolean(renderMobileContent);
   const [position, setPosition] = useState<CSSProperties>({ opacity: 0 });
   const [query, setQuery] = useState(opening.query);
   const [activeValue, setActiveValue] = useState(opening.active);
@@ -192,7 +200,7 @@ function SelectorPopup<T extends string>({
       window.visualViewport?.removeEventListener('scroll', place);
       if (compact) document.documentElement.style.overflow = oldOverflow;
     };
-  }, [compact, anchor, largeList, onDismiss]);
+  }, [compact, anchor, largeList, onDismiss, customMobileContent]);
 
   useLayoutEffect(() => {
     if (activeId && position.opacity !== 0) document.getElementById(activeId)?.scrollIntoView({ block: 'nearest' });
@@ -250,6 +258,7 @@ function SelectorPopup<T extends string>({
         <X className="h-5 w-5" aria-hidden="true" />
       </button>
     </div>}
+    {customMobileContent ? renderMobileContent!({ onSelect }) : <>
     {searchLabel && <div className="selector-search mx-2 mt-2 mb-1 flex shrink-0 items-center gap-2 rounded-lg border px-3">
       <Search className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" aria-hidden="true" />
       <input
@@ -285,5 +294,6 @@ function SelectorPopup<T extends string>({
       </div>)}
     </div>
     {!filtered.length && <p className="selector-description px-3 py-6 text-center text-sm" role="status">No matches. Try another search.</p>}
+    </>}
   </dialog>;
 }
