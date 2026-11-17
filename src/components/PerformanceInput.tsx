@@ -68,7 +68,7 @@ function StepButtons({ label, value, min, max, onChange, step, unit }: Performan
           aria-label={`${delta < 0 ? 'Decrease' : 'Increase'} ${label.toLowerCase()} by ${step} ${unit}`}
           disabled={value !== null && (delta < 0 ? value <= min : value >= max)}
           onClick={() => onChange(Math.min(max, Math.max(min, (value ?? 0) + delta)))}
-          className="min-h-11 min-w-11 px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-mono text-sm lg:text-base font-semibold cursor-pointer hover:border-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="press min-h-11 min-w-11 px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-mono text-sm lg:text-base font-semibold cursor-pointer hover:border-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {delta > 0 ? '+' : '−'}{step}{unit === 'seconds' ? 's' : ''}
         </button>
