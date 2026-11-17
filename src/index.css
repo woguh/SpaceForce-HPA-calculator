@@ -301,3 +301,12 @@
 @media (prefers-reduced-motion: reduce) {
   .press:active { transform: none; }
 }
+
+/* Terminal toasts: blink in over 180ms in 3 steps, out over 100ms in 2. */
+@keyframes terminal-toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes terminal-toast-out { from { opacity: 1; } to { opacity: 0; } }
+.terminal-toast[data-mounted='true'] { animation: terminal-toast-in 180ms steps(3, end) both; }
+.terminal-toast[data-removed='true'] { animation: terminal-toast-out 100ms steps(2, end) forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .terminal-toast[data-mounted='true'], .terminal-toast[data-removed='true'] { animation: none; }
+}

@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import type { AssessmentInputs, AssessmentResult } from '../utils/calculator';
 import { formatResultSummary } from '../utils/resultSummary';
+import { toast } from '@/components/ui/toast';
 
 export function CopyResultsButton({ inputs, result, enabled }: { inputs: AssessmentInputs; result: AssessmentResult; enabled: boolean }) {
   const [state, setState] = useState<'ready' | 'copied' | 'manual'>('ready');
@@ -17,12 +18,12 @@ export function CopyResultsButton({ inputs, result, enabled }: { inputs: Assessm
   }, [state]);
 
   const copy = async () => {
-    try { await navigator.clipboard.writeText(text); setState('copied'); }
+    try { await navigator.clipboard.writeText(text); setState('copied'); toast.success('> RESULTS COPIED', { description: `${result.compositeScore.toFixed(1)} / 100 · ready to paste` }); }
     catch { setState('manual'); }
   };
   return (
     <div className="mt-1 space-y-2 text-right">
-      <button type="button" onClick={copy} disabled={!enabled} aria-describedby={!enabled ? `${id}-hint` : undefined} className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium text-slate-600 dark:text-slate-400 cursor-pointer hover:text-cyan-700 dark:hover:text-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed">
+      <button type="button" onClick={copy} disabled={!enabled} aria-describedby={!enabled ? `${id}-hint` : undefined} className="press inline-flex min-h-8 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium text-slate-600 dark:text-slate-400 cursor-pointer hover:text-cyan-700 dark:hover:text-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed">
         {state === 'copied' ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Copy className="h-3.5 w-3.5" aria-hidden="true" />}
         {state === 'copied' ? 'Copied!' : 'Copy results'}
       </button>
