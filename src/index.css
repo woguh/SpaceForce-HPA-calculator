@@ -48,6 +48,13 @@
   transition: border-color 180ms ease-out;
 }
 
+.score-number {
+  --number-flow-mask-height: .08em;
+  --number-flow-mask-width: .25em;
+  font-variant-numeric: tabular-nums;
+  vertical-align: baseline;
+}
+
 .score-card:has(.score-indicator[data-maxed='true']) {
   border-color: rgb(16 185 129 / 55%);
 }
