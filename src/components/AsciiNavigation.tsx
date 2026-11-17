@@ -1,3 +1,7 @@
+import * as m from 'motion/react-m';
+
+const SPRING = { type: 'spring', stiffness: 500, damping: 40, mass: 0.8 } as const;
+
 const LETTERS: Record<string, [string, string, string]> = {
   A: [' _ ', '|_|', '| |'],
   C: [' _ ', '|  ', '|_ '],
@@ -35,10 +39,11 @@ export function AsciiNavigation<T extends string>({ views, activeView, onChange 
       aria-label={view.label}
       aria-pressed={activeView === view.id}
       onClick={() => onChange(view.id)}
-      className={`min-h-11 shrink-0 rounded-sm py-1 text-left font-mono transition-colors cursor-pointer hover:text-cyan-700 dark:hover:text-cyan-200 ${activeView === view.id ? 'text-cyan-700 dark:text-cyan-300' : 'text-slate-600 dark:text-slate-400'}`}
+      className={`press relative min-h-11 shrink-0 rounded-sm py-1 text-left font-mono transition-colors cursor-pointer hover:text-cyan-700 dark:hover:text-cyan-200 ${activeView === view.id ? 'text-cyan-700 dark:text-cyan-300' : 'text-slate-600 dark:text-slate-400'}`}
     >
       <pre aria-hidden="true" className="hidden select-none font-mono text-[7px] md:text-[8px] lg:text-[9px] font-semibold leading-[1.1] sm:block">{wordArt(view.label)}</pre>
       <span aria-hidden="true" className="block whitespace-pre select-none text-[10px] min-[375px]:text-xs leading-[1.3] sm:hidden">{`[ ${view.label} ]\n${'_'.repeat(view.label.length + 4)}`}</span>
+      {activeView === view.id && <m.span aria-hidden="true" layoutId="ascii-nav-underline" transition={SPRING} className="phosphor-glow pointer-events-none absolute inset-x-0 -bottom-0.5 hidden h-0.5 rounded-full bg-cyan-500 dark:bg-cyan-400 sm:block" />}
     </button>)}
   </nav>;
 }

@@ -1,4 +1,8 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useId, useRef } from 'react';
+import * as m from 'motion/react-m';
+
+/** Shared UI spring: settles in ~200ms with no overshoot. */
+const SPRING = { type: 'spring', stiffness: 500, damping: 40, mass: 0.8 } as const;
 
 interface Option<T extends string> {
   value: T;
@@ -16,24 +20,7 @@ interface SegmentedControlProps<T extends string> {
 export function SegmentedControl<T extends string>({ label, value, options, equalWidth = false, onChange }: SegmentedControlProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef(new Map<T, HTMLButtonElement>());
-  const [bounds, setBounds] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
-  const optionKey = options.map(option => `${option.value}:${option.label}`).join('|');
-
-  useLayoutEffect(() => {
-    const container = containerRef.current;
-    const measure = () => {
-      const button = buttonRefs.current.get(value);
-      if (!container || !button) return;
-      const next = { x: button.offsetLeft, y: button.offsetTop, width: button.offsetWidth, height: button.offsetHeight };
-      setBounds(previous => previous && previous.x === next.x && previous.y === next.y
-        && previous.width === next.width && previous.height === next.height ? previous : next);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    if (container) observer.observe(container);
-    buttonRefs.current.forEach(button => observer.observe(button));
-    return () => observer.disconnect();
-  }, [value, optionKey]);
+  const highlightId = useId();
 
   return (
     <div
@@ -55,12 +42,6 @@ export function SegmentedControl<T extends string>({ label, value, options, equa
         if (next !== value) onChange(next);
       }}
     >
-      {bounds && <span
-        aria-hidden="true"
-        data-testid="selection-highlight"
-        className="selection-highlight pointer-events-none absolute left-0 top-0 -z-10 rounded-md bg-white shadow-xs dark:bg-slate-800"
-        style={{ width: bounds.width, height: bounds.height, transform: `translate(${bounds.x}px, ${bounds.y}px)` }}
-      />}
       {options.map(option => <button
         key={option.value}
         ref={element => {
@@ -71,8 +52,15 @@ export function SegmentedControl<T extends string>({ label, value, options, equa
         aria-pressed={value === option.value}
         tabIndex={value === option.value ? 0 : -1}
         onClick={() => onChange(option.value)}
-        className={`relative rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors sm:px-2.5 sm:text-xs lg:px-3 lg:py-2 lg:text-base lg:font-semibold cursor-pointer ${equalWidth ? 'min-w-0 flex-1' : ''} ${value === option.value ? option.tone === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+        className={`press relative rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors sm:px-2.5 sm:text-xs lg:px-3 lg:py-2 lg:text-base lg:font-semibold cursor-pointer ${equalWidth ? 'min-w-0 flex-1' : ''} ${value === option.value ? option.tone === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
       >
+        {value === option.value && <m.span
+          aria-hidden="true"
+          data-testid="selection-highlight"
+          layoutId={`segment-${highlightId}`}
+          transition={SPRING}
+          className="pointer-events-none absolute inset-0 -z-10 rounded-md bg-white shadow-xs dark:bg-slate-800 dark:ring-1 dark:ring-cyan-400/40"
+        />}
         {option.label}
       </button>)}
     </div>

@@ -339,8 +339,14 @@ export default function App() {
           </div>
         </section>
 
-        <AnimatePresence initial={false}>
-          <m.div key={activeTab} className="space-y-6" initial={{ opacity: .82 }} animate={{ opacity: 1 }} transition={{ duration: .15 }}>
+        <AnimatePresence mode="wait" initial={false}>
+          <m.div
+            key={activeTab}
+            className="space-y-6"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } }}
+            exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: [0.4, 0, 0.2, 1] } }}
+          >
         {activeTab === 'calculator' && (
           <>
             {/* Compact Profile & Base Selector Card */}
@@ -550,7 +556,7 @@ export default function App() {
                   setWaistMeasurements({ waist: '', height: '' });
                   setWaistResetToken((token) => token + 1);
                 }}
-                className="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                className="press inline-flex min-h-8 items-center gap-1 hover:text-slate-900 dark:hover:text-white cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset to Default Values</span>
@@ -558,7 +564,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setActiveTab('goal')}
-                className="font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
+                className="press min-h-8 font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
               >
                 Need a target score plan? Open Goal Planner →
               </button>

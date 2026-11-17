@@ -285,3 +285,19 @@
 .dark .height-wheel .height-wheel-highlight { border-color: #155e75; background: #102e3d; }
 .dark .height-wheel .height-wheel-selected { color: #a5f3fc; }
 .dark .height-wheel [data-rwp]:focus-visible .height-wheel-highlight { outline-color: #22d3ee; }
+
+/* ---- Shared motion spec ---- */
+:root {
+  --dur-press: 80ms;
+  --dur-fast: 140ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Tactile press: buttons shrink to 0.97 for 80ms. */
+@utility press {
+  transition: transform var(--dur-press) var(--ease-out-expo), color var(--dur-fast) var(--ease-out-expo), border-color var(--dur-fast) var(--ease-out-expo), box-shadow var(--dur-fast) var(--ease-out-expo);
+  &:active:not(:disabled) { transform: scale(0.97); }
+}
+.phosphor-glow { box-shadow: 0 0 8px rgb(34 211 238 / 55%), 0 0 2px rgb(34 211 238 / 90%); }
+@media (prefers-reduced-motion: reduce) {
+  .press:active { transform: none; }
+}
