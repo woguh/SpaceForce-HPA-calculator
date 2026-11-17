@@ -1,4 +1,5 @@
-import { useId } from 'react';
+import { lazy, Suspense, useId } from 'react';
+import { useReducedMotionPreference } from '../hooks/useReducedMotionPreference';
 import { formatHeightFeetInches } from '../utils/waistRatio';
 import { Selector, type SelectorOption } from './Selector';
 
@@ -14,9 +15,11 @@ const heightOption = (height: number): SelectorOption => ({
   description: `${height} inches`, keywords: `${Math.floor(height / 12)} ${height % 12}`,
 });
 const HEIGHT_OPTIONS = HEIGHTS.map(heightOption);
+const MobileHeightPicker = lazy(() => import('./MobileHeightPicker'));
 
 export function HeightInput({ value, error, onChange }: HeightInputProps) {
   const id = useId();
+  const reducedMotion = useReducedMotionPreference();
   const total = Number(value);
   const selected = value.trim() && !error && Number.isFinite(total) && total > 0 ? String(total) : '';
   return <div className="min-w-0 space-y-3">
@@ -29,6 +32,9 @@ export function HeightInput({ value, error, onChange }: HeightInputProps) {
         invalid={Boolean(error)} describedBy={error ? `${id}-error` : undefined}
         options={[{ value: '', label: 'Clear height' }, ...(selected && Number.isInteger(total) && !HEIGHTS.includes(total) ? [heightOption(total)] : []), ...HEIGHT_OPTIONS]}
         onChange={onChange}
+        renderMobileContent={reducedMotion ? undefined : ({ onSelect }) => <Suspense fallback={<p role="status" className="flex h-96 min-h-0 items-center justify-center px-4 text-center text-sm text-slate-600 dark:text-slate-300">Loading height picker…</p>}>
+          <MobileHeightPicker value={value} onConfirm={onSelect} />
+        </Suspense>}
       />
     </div>
     <div>
