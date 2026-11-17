@@ -300,6 +300,3 @@
   &:active:not(:disabled) { transform: scale(0.97); }
 }
 .phosphor-glow { box-shadow: 0 0 8px rgb(34 211 238 / 55%), 0 0 2px rgb(34 211 238 / 90%); }
-@media (prefers-reduced-motion: reduce) {
-  .press:active { transform: none; }
-}
