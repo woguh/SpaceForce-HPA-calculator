@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react';
 import {
-  AdditiveBlending, BufferAttribute, BufferGeometry, Color, DirectionalLight,
+  AdditiveBlending, BackSide, BufferAttribute, BufferGeometry, Color, DirectionalLight,
   DynamicDrawUsage, Group, HemisphereLight, InstancedMesh, LineBasicMaterial, Material,
   LineLoop, Mesh, MeshStandardMaterial, Object3D, PerspectiveCamera,
   Points, PointsMaterial, RepeatWrapping, Scene, ShaderMaterial, SphereGeometry, SRGBColorSpace,
   TextureLoader, Vector2, Vector3, WebGLRenderer,
 } from 'three';
-import { createRockGeometry, createSpacecraft, type Spacecraft } from './orbitalModels';
+import { createModelLibrary, type ModelLibrary, type Spacecraft } from './orbitalModels';
+import { createLunarScene } from './lunarScene';
+import nightMapUrl from '../assets/earth-night.webp';
 import rockMapUrl from '../assets/rock-regolith.webp';
 import cloudMapUrl from '../assets/earth-clouds.webp';
 import earthMapUrl from '../assets/earth-blue-marble.webp';
@@ -24,6 +26,9 @@ const planetVertex = `
 
 const planetFragment = `
   uniform sampler2D earthMap;
+  uniform sampler2D nightMap;
+  uniform float time;
+  uniform vec3 solarDirection;
   uniform sampler2D cloudMap;
   uniform float cloudOffset;
   uniform float cloudOpacity;
@@ -42,14 +47,24 @@ const planetFragment = `
     float shadow = texture2D(cloudMap, weatherUV + vec2(-0.0019, 0.0012)).r * cloudOpacity;
     vec3 surfaceColor = mix(terrain * (1.0 - shadow * 0.32), vec3(0.94, 0.96, 1.0), clouds);
 
-    vec3 light = normalize(vec3(-0.44, 0.38, 0.82));
-    float sunlight = smoothstep(-0.25, 0.91, dot(n, light));
+    vec3 light = normalize(solarDirection);
+    float incidence = dot(n, light);
+    float sunlight = smoothstep(-0.16, 0.85, incidence);
     float limb = pow(1.0 - max(n.z, 0.0), 3.4);
     vec3 halfVector = normalize(light + vec3(0.0, 0.0, 1.0));
     float glint = pow(max(dot(n, halfVector), 0.0), 36.0) * ocean * (1.0 - clouds);
-    vec3 color = surfaceColor * (0.28 + sunlight * 1.02)
+    vec3 color = surfaceColor * (vec3(0.035, 0.065, 0.12) + sunlight * vec3(1.27, 1.16, 1.08))
                + vec3(0.11, 0.16, 0.19) * glint
                + vec3(0.013, 0.22, 0.51) * limb * (0.09 + 0.84 * sunlight);
+    float dusk = 1.0 - smoothstep(-0.28, 0.19, incidence);
+    vec3 settlements = texture2D(nightMap, mapCoordinates).rgb;
+    color += settlements * vec3(1.55, 1.12, 0.78) * dusk * (1.0 - 0.8 * clouds);
+    // The magnetic oval winds around a tilted pole and drifts over the night side.
+    float longitude = mapCoordinates.x * 6.283185;
+    float oval = mapCoordinates.y - (0.825 + 0.044 * sin(longitude + 0.8)
+      + 0.012 * sin(5.0 * longitude + time * 0.09));
+    float curtain = exp(-abs(oval) * 180.0) * (0.65 + 0.35 * sin(46.0 * longitude + time * 0.26));
+    color += vec3(0.012, 0.64, 0.37) * curtain * (0.12 + 0.88 * dusk);
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>
   }
@@ -73,14 +88,14 @@ type OrbitSettings = {
   track: number;
 };
 
-function createSatelliteOrbit({ craftType, radius, tilt, start, speed, track }: OrbitSettings) {
+function createSatelliteOrbit({ craftType, radius, tilt, start, speed, track }: OrbitSettings, models: ModelLibrary) {
   const orbit = new Group();
   orbit.rotation.set(...tilt);
   orbit.add(new LineLoop(circle(radius), new LineBasicMaterial({
-    color: track, transparent: true, opacity: 0.64, depthWrite: false,
+    color: track, transparent: true, opacity: 0.40, depthWrite: false,
   })));
 
-  const craft = createSpacecraft(craftType);
+  const craft = models.spacecraft(craftType, craftType === 'telescope' ? .32 : .37);
   orbit.add(craft);
 
   let phase = start;
@@ -114,21 +129,15 @@ function createStars(count: number, size: number, seed: number) {
   );
 }
 
-function createAsteroids(refresh: () => void) {
-  const count = 72;
+function createAsteroids(refresh: () => void, models: ModelLibrary) {
+  const count = 36;
   const random = seededRandom(2037);
   const regolith = new TextureLoader().load(rockMapUrl, refresh);
   regolith.wrapS = regolith.wrapT = RepeatWrapping;
   regolith.repeat.set(3, 2);
-  const material = new MeshStandardMaterial({ map: regolith, bumpMap: regolith, bumpScale: .009, roughness: 0.96, vertexColors: true });
+  const material = new MeshStandardMaterial({ map: regolith, bumpMap: regolith, bumpScale: .0025, roughness: 0.96, color: 0xb5b2a9 });
   const belt = new Group();
-  const batches = Array.from({ length: 3 }, (_, variant) => {
-    const mesh = new InstancedMesh(createRockGeometry(variant, 4), material, count / 3);
-    mesh.instanceMatrix.setUsage(DynamicDrawUsage);
-    mesh.frustumCulled = false;
-    belt.add(mesh);
-    return mesh;
-  });
+  const batches: InstancedMesh[] = [];
   const rock = new Object3D();
   const rockColor = new Color();
   const slate = new Color(0x89929f);
@@ -136,27 +145,41 @@ function createAsteroids(refresh: () => void) {
   const rocks = Array.from({ length: count }, (_, i) => {
     const angle = random() * Math.PI * 2;
     const radius = 1.9 + random() * 1.32;
-    const size = i % 13 === 0 ? .12 + random() * .09 : .024 + random() * .064;
+    const size = i % 13 === 0 ? .066 + random() * .06 : .014 + random() * .035;
     const height = (random() - 0.5) * .44;
     const scale = new Vector3(size, size * (.52 + random() * .42), size * (.57 + random() * .51));
     const rotation = new Vector3(random() * 6, random() * 6, random() * 6);
-    batches[i % 3].setColorAt(Math.floor(i / 3), rockColor.lerpColors(slate, sandstone, random()));
-    return { angle, radius, height, scale, rotation,
+    const tint = random();
+    return { angle, radius, height, scale, rotation, tint,
       speed: 0.20 / Math.pow(radius, 1.5), spin: (random() - .5) * .54 };
   });
 
+  let elapsed = 0;
   function update(time: number) {
+    elapsed = time;
     rocks.forEach(({ angle, radius, height, scale, rotation, speed, spin }, i) => {
+      const batch = batches[i % 3];
+      if (!batch) return;
       const phase = angle + time * speed;
       rock.position.set(Math.cos(phase) * radius, Math.sin(phase) * radius, height);
       rock.scale.copy(scale);
       rock.rotation.set(rotation.x + time * spin, rotation.y + time * spin * .57, rotation.z);
       rock.updateMatrix();
-      batches[i % 3].setMatrixAt(Math.floor(i / 3), rock.matrix);
+      batch.setMatrixAt(Math.floor(i / 3), rock.matrix);
     });
-    for (const batch of batches) batch.instanceMatrix.needsUpdate = true;
+    batches.forEach(batch => { batch.instanceMatrix.needsUpdate = true; });
   }
-  update(0);
+  models.asteroids((geometry, index) => {
+    const mesh = new InstancedMesh(geometry, material, count / 3);
+    mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+    mesh.frustumCulled = false;
+    batches[index] = mesh;
+    for (let i = index; i < count; i += 3) {
+      mesh.setColorAt(Math.floor(i / 3), rockColor.lerpColors(slate, sandstone, rocks[i].tint));
+    }
+    belt.add(mesh);
+    update(elapsed);
+  });
   return { belt, update, regolith };
 }
 
@@ -182,6 +205,17 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
     const camera = new PerspectiveCamera(34, 1, 0.1, 40);
     camera.position.z = 8.1;
     let disposed = false;
+    function refresh() { if (!disposed) sync(); }
+    const models = createModelLibrary(refresh);
+    const lunar = createLunarScene(refresh, models);
+    scene.add(lunar.objects);
+    const nightMap = new TextureLoader().load(nightMapUrl, refresh);
+    nightMap.colorSpace = SRGBColorSpace;
+    const solarDirection = new Vector3(-0.89, 0.37, 0.32).normalize();
+    const viewSun = solarDirection.clone();
+    const system = new Group();
+    system.position.set(.18, .64, -.42);
+    scene.add(system);
     const earthMap = new TextureLoader().load(earthMapUrl, () => {
       if (disposed) return;
       planet.visible = true;
@@ -196,13 +230,13 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
     cloudMap.wrapS = RepeatWrapping;
     const planet = new Mesh(new SphereGeometry(1.08, 64, 48), new ShaderMaterial({
       vertexShader: planetVertex, fragmentShader: planetFragment,
-      uniforms: { earthMap: { value: earthMap }, cloudMap: { value: cloudMap }, cloudOffset: { value: 0 }, cloudOpacity: { value: 0 } },
+      uniforms: { time: { value: 0 }, solarDirection: { value: viewSun }, nightMap: { value: nightMap }, earthMap: { value: earthMap }, cloudMap: { value: cloudMap }, cloudOffset: { value: 0 }, cloudOpacity: { value: 0 } },
     }));
     planet.visible = false;
-    planet.rotation.set(0.13, -0.92, 0.13);
-    scene.add(planet);
+    planet.rotation.set(0.19, -1.18, 0.15);
+    system.add(planet);
 
-    const atmosphere = new Mesh(new SphereGeometry(1.115, 48, 32), new ShaderMaterial({
+    const atmosphere = new Mesh(new SphereGeometry(1.126, 72, 48), new ShaderMaterial({
       vertexShader: `
         varying vec3 viewNormal;
         void main() {
@@ -214,26 +248,31 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
         varying vec3 viewNormal;
         void main() {
           vec3 n = normalize(viewNormal);
-          float rim = pow(1.0 - max(n.z, 0.0), 5.0);
-          gl_FragColor = vec4(0.19, 0.66, 0.89, rim * 0.35);
+          // The outer shell fades to space at its silhouette. The solid globe
+          // occludes the back faces and leaves only the atmospheric limb.
+          float rim = smoothstep(0.02, 0.36, abs(n.z));
+          float day = smoothstep(-0.3, 0.7, dot(n, normalize(vec3(-0.89, 0.37, 0.32))));
+          vec3 scatter = mix(vec3(0.12, 0.23, 0.76), vec3(0.21, 0.69, 1.0), day);
+          gl_FragColor = vec4(scatter, rim * rim * (0.12 + 0.78 * day));
         }
       `,
-      transparent: true, blending: AdditiveBlending, depthWrite: false,
+      side: BackSide, transparent: true, blending: AdditiveBlending, depthWrite: false,
     }));
-    scene.add(atmosphere);
+    system.add(atmosphere);
     const satellites = [
-      createSatelliteOrbit({ craftType: 'surveyor', radius: 1.56, tilt: [.93, -.15, -.46], start: .71, speed: .24, track: 0x81dcf5 }),
-      createSatelliteOrbit({ craftType: 'telescope', radius: 1.93, tilt: [.44, -.44, .68], start: -1.69, speed: -.17, track: 0xb8bbf0 }),
+      createSatelliteOrbit({ craftType: 'surveyor', radius: 1.56, tilt: [.93, -.15, -.46], start: .71, speed: .24, track: 0x81dcf5 }, models),
+      createSatelliteOrbit({ craftType: 'telescope', radius: 1.93, tilt: [.44, -.44, .68], start: -1.69, speed: -.17, track: 0xb8bbf0 }, models),
     ];
-    const asteroids = createAsteroids(() => { if (!disposed) sync(); });
+    const asteroids = createAsteroids(refresh, models);
     const beltPlane = new Group();
-    beltPlane.rotation.set(1.05, -0.15, -0.43);
+    beltPlane.rotation.set(1.33, -.16, .57);
+    beltPlane.position.set(-.28, .08, .56);
     beltPlane.add(asteroids.belt);
-    scene.add(beltPlane, createStars(390, 0.017, 19), createStars(85, 0.036, 83),
-      ...satellites.map(({ orbit }) => orbit));
-    const sun = new DirectionalLight(0xd6f4ff, 2.6);
-    sun.position.set(-3, 2, 4);
-    scene.add(sun, new HemisphereLight(0xb8d8ed, 0x24273c, 1.15));
+    system.add(...satellites.map(({ orbit }) => orbit));
+    scene.add(beltPlane, createStars(235, .013, 19), createStars(48, .022, 83));
+    const sun = new DirectionalLight(0xb8d7ff, 1.48);
+    sun.position.copy(solarDirection);
+    scene.add(sun, new HemisphereLight(0xa4c9fc, 0x242634, .53));
 
     const pointer = new Vector2();
     let still = pausedRef.current;
@@ -248,17 +287,21 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
       previous = time;
       if (!still) {
         elapsed += delta;
-        planet.rotation.y += delta * 0.064;
+        lunar.update(elapsed);
+        planet.material.uniforms.time.value = elapsed;
+        planet.rotation.y += delta * 0.045;
         planet.material.uniforms.cloudOffset.value = (elapsed * 0.0015) % 1;
         asteroids.update(elapsed);
         satellites.forEach(satellite => satellite.advance(delta));
         const ease = 1 - Math.exp(-delta * 4.8);
-        const targetX = pointer.x * 0.94 + 0.22 * Math.sin(elapsed * 0.19);
-        const targetY = pointer.y * 0.53 + 0.11 * Math.sin(elapsed * 0.13);
+        const targetX = pointer.x * 0.98 + 0.29 * Math.sin(elapsed * 0.19);
+        const targetY = pointer.y * 0.38 + 0.11 * Math.sin(elapsed * 0.13);
         camera.position.x += (targetX - camera.position.x) * ease;
         camera.position.y += (targetY - camera.position.y) * ease;
       }
       camera.lookAt(0, 0, 0);
+      camera.updateMatrixWorld();
+      viewSun.copy(solarDirection).transformDirection(camera.matrixWorldInverse);
       renderer.render(scene, camera);
       if (!still && visible && !document.hidden) frame = requestAnimationFrame(render);
     }
@@ -307,6 +350,7 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
       window.removeEventListener('pointermove', trackPointer);
       document.documentElement.removeEventListener('pointerleave', resetPointer);
       document.removeEventListener('visibilitychange', sync);
+      models.dispose();
       const materials = new Set<Material>();
       scene.traverse(object => {
         if (object instanceof Mesh || object instanceof Points || object instanceof LineLoop) {
@@ -316,6 +360,8 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
         if (object instanceof InstancedMesh) object.dispose();
       });
       materials.forEach(material => material.dispose());
+      nightMap.dispose();
+      lunar.dispose();
       earthMap.dispose();
       cloudMap.dispose();
       asteroids.regolith.dispose();
