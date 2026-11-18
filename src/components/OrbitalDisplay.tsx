@@ -3,7 +3,7 @@ import {
   AdditiveBlending, BackSide, BufferAttribute, BufferGeometry, Color, DirectionalLight,
   DynamicDrawUsage, Group, HemisphereLight, InstancedMesh, LineBasicMaterial, Material,
   LineLoop, Mesh, MeshStandardMaterial, Object3D, PerspectiveCamera,
-  Points, PointsMaterial, RepeatWrapping, Scene, ShaderMaterial, SphereGeometry, SRGBColorSpace,
+  Points, RepeatWrapping, Scene, ShaderMaterial, SphereGeometry, SRGBColorSpace,
   TextureLoader, Vector2, Vector3, WebGLRenderer,
 } from 'three';
 import { createModelLibrary, type ModelLibrary, type Spacecraft } from './orbitalModels';
@@ -115,18 +115,53 @@ function seededRandom(seed: number) {
   };
 }
 
-function createStars(count: number, size: number, seed: number) {
-  const coordinates = new Float32Array(count * 3);
-  const random = seededRandom(seed);
-  for (let i = 0; i < coordinates.length; i += 3) {
-    coordinates[i] = (random() - 0.5) * 18;
-    coordinates[i + 1] = (random() - 0.5) * 10;
-    coordinates[i + 2] = -1.4 - random() * 9;
+function createStarField() {
+  const random = seededRandom(83);
+  const coordinates: number[] = [];
+  const appearance: number[] = [];
+  // Low-luminance dust at two depths gives the wide field parallax.
+  for (const layer of [
+    { count: 1050, left: -31, width: 48, height: 24, z: -11, depth: 9 },
+    { count: 285, left: -13, width: 23, height: 13, z: -3, depth: 5 },
+  ]) {
+    for (let i = 0; i < layer.count; i++) {
+      coordinates.push(layer.left + random() * layer.width, (random() - .5) * layer.height,
+        layer.z - random() * layer.depth);
+      appearance.push(random() ** 1.9, random(), random() * Math.PI * 2);
+    }
   }
-  return new Points(
-    new BufferGeometry().setAttribute('position', new BufferAttribute(coordinates, 3)),
-    new PointsMaterial({ color: 0xb7e8ff, size, opacity: 0.68, transparent: true, depthWrite: false }),
-  );
+  const geometry = new BufferGeometry()
+    .setAttribute('position', new BufferAttribute(new Float32Array(coordinates), 3))
+    .setAttribute('appearance', new BufferAttribute(new Float32Array(appearance), 3));
+  return new Points(geometry, new ShaderMaterial({
+    transparent: true, depthWrite: false, blending: AdditiveBlending,
+    uniforms: { time: { value: 0 }, pixelRatio: { value: 1 } },
+    vertexShader: `
+      attribute vec3 appearance;
+      uniform float time;
+      uniform float pixelRatio;
+      varying vec3 starColor;
+      varying float strength;
+
+      void main() {
+        vec4 view = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * view;
+        gl_PointSize = pixelRatio * (1.2 + 2.1 * appearance.x) * clamp(14.0 / -view.z, 0.55, 1.2);
+        starColor = mix(vec3(0.36, 0.66, 1.0), vec3(1.0, 0.81, 0.57), appearance.y);
+        strength = (0.16 + 0.57 * appearance.x) * (0.89 + sin(time * 0.77 + appearance.z) * 0.11);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 starColor;
+      varying float strength;
+
+      void main() {
+        float radius = length(gl_PointCoord * 2.0 - 1.0);
+        float core = 1.0 - smoothstep(0.1, 1.0, radius);
+        gl_FragColor = vec4(starColor, strength * core * core);
+      }
+    `,
+  }));
 }
 
 function createAsteroids(refresh: () => void, models: ModelLibrary) {
@@ -183,7 +218,9 @@ function createAsteroids(refresh: () => void, models: ModelLibrary) {
   return { belt, update, regolith };
 }
 
-export default function OrbitalDisplay({ paused }: { paused: boolean }) {
+export type OrbitalDisplayProps = { paused: boolean; onUnavailable: () => void };
+
+export default function OrbitalDisplay({ paused, onUnavailable }: OrbitalDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const updatePause = useRef<((paused: boolean) => void) | null>(null);
   const pausedRef = useRef(paused);
@@ -196,10 +233,18 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const context = canvas.getContext('webgl2', { alpha: true, antialias: true });
-    if (!context) return;
-
-    const renderer = new WebGLRenderer({ canvas, context, alpha: true, antialias: true });
+    let renderer: WebGLRenderer;
+    try {
+      const context = canvas.getContext('webgl2', { alpha: true, antialias: true });
+      if (!context) {
+        onUnavailable();
+        return;
+      }
+      renderer = new WebGLRenderer({ canvas, context, alpha: true, antialias: true });
+    } catch {
+      onUnavailable();
+      return;
+    }
     renderer.setClearColor(0x000000, 0);
     const scene = new Scene();
     const camera = new PerspectiveCamera(34, 1, 0.1, 40);
@@ -269,7 +314,8 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
     beltPlane.position.set(-.28, .08, .56);
     beltPlane.add(asteroids.belt);
     system.add(...satellites.map(({ orbit }) => orbit));
-    scene.add(beltPlane, createStars(235, .013, 19), createStars(48, .022, 83));
+    const stars = createStarField();
+    scene.add(beltPlane, stars);
     const sun = new DirectionalLight(0xb8d7ff, 1.48);
     sun.position.copy(solarDirection);
     scene.add(sun, new HemisphereLight(0xa4c9fc, 0x242634, .53));
@@ -288,6 +334,7 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
       if (!still) {
         elapsed += delta;
         lunar.update(elapsed);
+        stars.material.uniforms.time.value = elapsed;
         planet.material.uniforms.time.value = elapsed;
         planet.rotation.y += delta * 0.045;
         planet.material.uniforms.cloudOffset.value = (elapsed * 0.0015) % 1;
@@ -317,10 +364,15 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
       const { width, height } = entry.contentRect;
       if (!width || !height) return;
       // Bound the canvas resolution on large or high-density monitors.
-      renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio, Math.sqrt(1_500_000 / (width * height))));
+      const pixelRatio = Math.min(1.5, window.devicePixelRatio, Math.sqrt(1_500_000 / (width * height)));
+      renderer.setPixelRatio(pixelRatio);
       renderer.setSize(width, height, false);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+      stars.material.uniforms.pixelRatio.value = pixelRatio;
+      // Set the optical center to the right so planets stay beside the calculator.
+      // The expanded frustum reveals the galaxy across the rest of the screen.
+      const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const sceneOffset = Math.min(width * .51, rootFontSize * 49) / 2;
+      camera.setViewOffset(width, height, -sceneOffset, 0, width, height);
       sync();
     });
     resize.observe(canvas);
@@ -367,7 +419,7 @@ export default function OrbitalDisplay({ paused }: { paused: boolean }) {
       asteroids.regolith.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [onUnavailable]);
 
   return <canvas ref={canvasRef} className="flight-orbit__canvas" />;
 }

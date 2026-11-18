@@ -1,9 +1,13 @@
 .flight-console {
+  --flight-workspace-start: max(3vw, calc((100vw - 84rem) / 2));
+  --flight-workspace-width: min(61vw, 48rem);
+  --flight-scene-scrim: rgb(15 27 43 / .42);
   background-color: #e9eef4;
   background-image: radial-gradient(ellipse at 70% 0%, #d9ebf2, transparent 55%);
 }
 
 .dark .flight-console {
+  --flight-scene-scrim: rgb(8 13 21 / .48);
   background-color: #080d15;
   background-image: radial-gradient(ellipse at 70% 0%, #132538, transparent 49%);
 }
@@ -94,15 +98,20 @@
 
 .flight-orbit {
   position: fixed;
-  inset: 0 0 0 min(51%, 49rem);
+  inset: 0;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, #a9c2d9 0%, #cbdce8 35%, transparent 75%);
-  mask-image: linear-gradient(to right, transparent, black 13%);
 }
 
-.dark .flight-orbit {
-  background: radial-gradient(ellipse at center, #20405a 0%, #121f34 36%, transparent 75%);
+.flight-orbit::after {
+  --flight-scrim-end: calc(var(--flight-workspace-start) + var(--flight-workspace-width));
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right,
+    var(--flight-scene-scrim) calc(var(--flight-scrim-end) - 13vw),
+    transparent var(--flight-scrim-end));
 }
 
 .flight-orbit__canvas {
@@ -134,8 +143,8 @@
 
 @media (min-width: 1024px) {
   .flight-workspace[data-orbital-display='true'] {
-    width: min(61vw, 48rem);
-    margin-inline-start: max(3vw, calc((100vw - 84rem) / 2));
+    width: var(--flight-workspace-width);
+    margin-inline-start: var(--flight-workspace-start);
   }
 
   .flight-score__top {
@@ -150,6 +159,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: .75rem;
   }
+
+  .flight-workspace[data-orbital-display='true'] .flight-action-reset { color: #cbd5e1; }
+  .flight-workspace[data-orbital-display='true'] .flight-action-reset:hover { color: white; }
+  .flight-workspace[data-orbital-display='true'] .flight-action-goal { color: #67e8f9; }
 
   .flight-profile > div { display: contents; }
   .flight-profile > div > div { margin: 0; }

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import * as m from 'motion/react-m';
 import {
   AlertTriangle,
@@ -23,6 +23,7 @@ import { ScoreNumber } from './components/ScoreNumber';
 import { CardioAltitudeBreakdown } from './components/CardioAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
 import { ForegroundAsteroid } from './components/ForegroundAsteroid';
+import type { OrbitalDisplayProps } from './components/OrbitalDisplay';
 import { useReducedMotionPreference } from './hooks/useReducedMotionPreference';
 import './flight-console.css';
 import { assessmentEntryCompletion, assessmentEntrySummary, assessmentInputsForEntry, EMPTY_PERFORMANCE, profileSettingsForEntry, type AssessmentEntry } from './utils/assessmentEntry';
@@ -45,7 +46,13 @@ import {
   calculateAssessment,
 } from './utils/calculator';
 
-const OrbitalDisplay = lazy(() => import('./components/OrbitalDisplay'));
+function UnavailableOrbit({ onUnavailable }: OrbitalDisplayProps) {
+  useEffect(onUnavailable, [onUnavailable]);
+  return null;
+}
+
+const OrbitalDisplay = lazy<React.ComponentType<OrbitalDisplayProps>>(() => import('./components/OrbitalDisplay')
+  .catch(() => ({ default: UnavailableOrbit })));
 const ORBIT_QUERY = '(min-width: 1024px) and (pointer: fine)';
 const showsDesktopOrbit = () => window.matchMedia(ORBIT_QUERY).matches;
 const hideServerOrbit = () => false;
@@ -116,7 +123,10 @@ export default function App() {
   const workspaceRef = useRef<HTMLDivElement>(null);
   const focusWorkspace = useRef(false);
   const [orbitPaused, setOrbitPaused] = useState(false);
-  const showOrbit = useSyncExternalStore(subscribeToOrbitVisibility, showsDesktopOrbit, hideServerOrbit);
+  const [orbitUnavailable, setOrbitUnavailable] = useState(false);
+  const disableOrbit = useCallback(() => setOrbitUnavailable(true), []);
+  const desktopOrbit = useSyncExternalStore(subscribeToOrbitVisibility, showsDesktopOrbit, hideServerOrbit);
+  const showOrbit = desktopOrbit && !orbitUnavailable;
   const reducedMotion = useReducedMotionPreference();
   const [waistResetToken, setWaistResetToken] = useState(0);
   const [waistMeasurements, setWaistMeasurements] = useState<WaistMeasurements>({ waist: '', height: '' });
@@ -228,7 +238,7 @@ export default function App() {
       />
       {showOrbit && <div className="flight-orbit" aria-hidden="true">
         <Suspense fallback={null}>
-          <OrbitalDisplay paused={orbitPaused || reducedMotion} />
+          <OrbitalDisplay paused={orbitPaused || reducedMotion} onUnavailable={disableOrbit} />
         </Suspense>
       </div>}
       {showOrbit && !orbitPaused && !reducedMotion && <ForegroundAsteroid />}
@@ -587,7 +597,7 @@ export default function App() {
                   setWaistMeasurements({ waist: '', height: '' });
                   setWaistResetToken((token) => token + 1);
                 }}
-                className="press inline-flex min-h-8 items-center gap-1 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                className="flight-action-reset press inline-flex min-h-8 items-center gap-1 hover:text-slate-900 dark:hover:text-white cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset to Default Values</span>
@@ -595,7 +605,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => openWorkspace('goal')}
-                className="press min-h-8 font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
+                className="flight-action-goal press min-h-8 font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
               >
                 Need a target score plan? Open Goal Planner →
               </button>
