@@ -1,10 +1,12 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 
 interface PerformanceSliderProps {
+  id?: string;
   label: string;
   value: number | null;
   min: number;
   max: number;
+  step?: number;
   valueText: string;
   describedBy?: string;
   formatValue: (value: number) => string;
@@ -12,13 +14,13 @@ interface PerformanceSliderProps {
 }
 
 export function PerformanceSlider({
-  label, value, min, max, valueText, describedBy, formatValue, onChange,
+  id, label, value, min, max, step = 1, valueText, describedBy, formatValue, onChange,
 }: PerformanceSliderProps) {
   const [dragging, setDragging] = useState(false);
   const [keyboardFocus, setKeyboardFocus] = useState(false);
   const bubbleRef = useRef<HTMLOutputElement>(null);
   const [halfBubbleWidth, setHalfBubbleWidth] = useState(0);
-  const current = Math.min(max, Math.max(min, Math.round(value ?? min)));
+  const current = Math.min(max, Math.max(min, min + Math.round(((value ?? min) - min) / step) * step));
   const fraction = max > min ? (current - min) / (max - min) : 0;
   const displayValue = formatValue(current);
   const active = dragging || keyboardFocus;
@@ -42,13 +44,14 @@ export function PerformanceSlider({
         {displayValue}
       </output>
       <input
+        id={id}
         type="range"
         aria-label={label}
         aria-describedby={describedBy}
         aria-valuetext={valueText}
         min={min}
         max={max}
-        step={1}
+        step={step}
         value={current}
         className="performance-slider block h-11 w-full rounded-md"
         data-keyboard-focus={keyboardFocus && !dragging}
