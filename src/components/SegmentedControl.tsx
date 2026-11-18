@@ -17,7 +17,7 @@ interface SegmentedControlProps<T extends string> {
   value: T;
   options: readonly Option<T>[];
   equalWidth?: boolean;
-  variant?: 'event' | 'reference';
+  variant?: 'event' | 'reference' | 'workspace';
   onChange: (value: T) => void;
 }
 
@@ -28,6 +28,7 @@ export function SegmentedControl<T extends string>({ label, value, options, equa
   const highlightBounds = useRef<HighlightBounds | null>(null);
   const optionKey = options.map(option => option.value).join('|');
   const reference = variant === 'reference';
+  const workspace = variant === 'workspace';
   const optionSize = reference
     ? 'px-2.5 py-1 text-xs sm:shrink-0 sm:whitespace-nowrap lg:text-sm'
     : 'px-1.5 py-1 text-[11px] sm:px-2.5 sm:text-xs lg:px-3 lg:py-2 lg:text-base lg:font-semibold';
@@ -84,7 +85,7 @@ export function SegmentedControl<T extends string>({ label, value, options, equa
       ref={containerRef}
       role="group"
       aria-label={label}
-      className={`relative isolate gap-1 rounded-lg bg-slate-100 dark:bg-slate-900 ${reference
+      className={`relative isolate gap-1 rounded-lg bg-slate-100 dark:bg-slate-900 ${workspace ? 'flight-menu flex' : reference
         ? 'grid w-full grid-cols-2 p-1 ring-1 ring-inset ring-slate-200 sm:flex sm:w-fit sm:flex-wrap sm:items-center dark:ring-slate-800'
         : 'flex flex-wrap items-center p-0.5'}`}
       onKeyDown={event => {
@@ -105,7 +106,7 @@ export function SegmentedControl<T extends string>({ label, value, options, equa
         ref={highlightRef}
         aria-hidden="true"
         data-testid="selection-highlight"
-        className="pointer-events-none absolute left-0 top-0 -z-10 origin-top-left rounded-md bg-white shadow-xs dark:bg-slate-800 dark:ring-1 dark:ring-cyan-400/40"
+        className="pointer-events-none absolute left-0 top-0 -z-10 origin-top-left rounded-md bg-white -outline-offset-1 dark:bg-slate-800 dark:outline dark:outline-1 dark:outline-cyan-400/40"
       />
       {options.map(option => <button
         key={option.value}

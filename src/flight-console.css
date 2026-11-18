@@ -1,0 +1,236 @@
+.flight-console {
+  background-color: #e9eef4;
+  background-image: radial-gradient(ellipse at 70% 0%, #d9ebf2, transparent 55%);
+}
+
+.dark .flight-console {
+  background-color: #080d15;
+  background-image: radial-gradient(ellipse at 70% 0%, #132538, transparent 49%);
+}
+
+.flight-workspace { margin-inline: auto; }
+
+.flight-menu {
+  --menu-edge: #b8ccd9;
+  width: min(100%, 28rem);
+  padding: .25rem;
+  border-radius: 999px;
+  background: #e7eff5;
+  outline: 1px solid var(--menu-edge);
+  outline-offset: -1px;
+}
+
+.dark .flight-menu {
+  --menu-edge: #31485d;
+  background: #101b2a;
+}
+
+.flight-menu > span { border-radius: 999px; }
+.flight-menu > button {
+  min-height: 2.5rem;
+  border-radius: 999px;
+  padding-inline: .45rem;
+  font-size: .875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.flight-case {
+  position: relative;
+  border: 1px solid #b7c6d3;
+  border-radius: 1rem;
+  background: #f8fbfd;
+}
+
+.dark .flight-case {
+  border-color: #304358;
+  background: #121d2b;
+}
+
+.flight-score {
+  overflow: hidden;
+  isolation: isolate;
+  padding: clamp(1.2rem, 2.8vw, 2rem);
+}
+
+.flight-workspace[data-orbital-display='false'] .flight-score::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto auto;
+  width: min(92%, 22rem);
+  height: 8.5rem;
+  background: url('/orbital-mobile.webp') 4.5rem -1rem / 100% auto no-repeat;
+  mask-image: linear-gradient(110deg, transparent 32%, black 74%), linear-gradient(180deg, black 52%, transparent 100%);
+  mask-composite: intersect;
+  opacity: .28;
+  pointer-events: none;
+}
+
+.dark .flight-workspace[data-orbital-display='false'] .flight-score::before { opacity: .66; }
+
+.flight-score[data-score-tone='pass'] { border-color: #437d71; }
+.flight-score[data-score-tone='fail'] { border-color: #ab6471; }
+
+.flight-score__readout {
+  position: relative;
+  z-index: 1;
+}
+
+.flight-score__value {
+  font-size: clamp(3.25rem, 8vw, 5.25rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.flight-score__top {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.flight-score__meter {
+  margin-top: .875rem;
+}
+
+.flight-orbit {
+  position: fixed;
+  inset: 0 0 0 min(51%, 49rem);
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, #a9c2d9 0%, #cbdce8 35%, transparent 75%);
+  mask-image: linear-gradient(to right, transparent, black 13%);
+}
+
+.dark .flight-orbit {
+  background: radial-gradient(ellipse at center, #20405a 0%, #121f34 36%, transparent 75%);
+}
+
+.flight-orbit__canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.flight-flyby {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flight-flyby img {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: clamp(4.5rem, 8vw, 8rem);
+  pointer-events: none;
+}
+
+.flight-case.score-card [role='group'] {
+  padding: .25rem;
+}
+
+@media (min-width: 1024px) {
+  .flight-workspace[data-orbital-display='true'] {
+    width: min(61vw, 48rem);
+    margin-inline-start: max(3vw, calc((100vw - 84rem) / 2));
+  }
+
+  .flight-score__top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .flight-score__status { text-align: right; }
+
+  .flight-profile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+  }
+
+  .flight-profile > div { display: contents; }
+  .flight-profile > div > div { margin: 0; }
+  .flight-profile > p { grid-column: 1 / -1; margin: 0; }
+}
+
+@media (min-width: 360px) and (max-width: 639px) {
+  .flight-profile > div:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+
+.flight-console {
+  --surface: #f7fafc;
+  --edge: #bacbd5;
+  --quiet-text: #496072;
+  --meter-ink: #637d90;
+}
+.dark .flight-console {
+  --surface: #111e2b;
+  --edge: #33475a;
+  --quiet-text: #abbfcf;
+  --meter-ink: #7893a7;
+}
+.flight-case, .dark .flight-case { background: var(--surface); }
+.flight-score {
+  border-color: var(--edge);
+  padding-block-end: 1rem;
+}
+.flight-score__heading {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-weight: 650;
+}
+.flight-score__status { min-width: 0; }
+.flight-score__status textarea { max-width: 100%; }
+.flight-score__ruler {
+  display: block;
+  width: 100%;
+  height: .24rem;
+  margin: 3px 0 0;
+  background: repeating-linear-gradient(to right, var(--meter-ink) 0 1px, transparent 1px 5%);
+}
+.flight-score__scale {
+  position: relative;
+  height: 1.2rem;
+  margin: .12rem 0 0;
+  color: var(--quiet-text);
+  font: 600 .69rem/1.25 var(--font-mono);
+}
+.flight-score__scale span { position: absolute; }
+.flight-score__scale span:nth-child(2) { left: 75%; transform: translateX(-50%); }
+.flight-score__scale span:nth-child(3) { left: 90%; transform: translateX(-50%); }
+.flight-score__scale span:last-child { right: 0; }
+.flight-score__thresholds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem 1.25rem;
+  margin: 0;
+  color: var(--quiet-text);
+  font-size: .77rem;
+}
+.flight-score__thresholds b { font-family: var(--font-mono); }
+.flight-score__events {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: .6rem;
+  border-top: 1px solid var(--edge);
+  padding-top: .8rem;
+  margin-top: 1rem;
+}
+.flight-score__events > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 .6rem; }
+.flight-score__events dt { font-size: .77rem; font-weight: 600; color: var(--quiet-text); }
+.flight-score__events dd { font: 650 1.05rem/1.5 var(--font-mono); }
+@media (min-width: 1024px) {
+  .flight-tools { position: absolute; top: .5rem; right: 0; }
+  .flight-workspace { padding-top: 1.6rem; }
+  .flight-score__status { max-width: 48%; }
+}
+@media (max-width: 639px) {
+  .flight-score__top { gap: .35rem; }
+  .flight-score__status { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .25rem .5rem; }
+  .flight-score__events > div { flex-direction: column; }
+}

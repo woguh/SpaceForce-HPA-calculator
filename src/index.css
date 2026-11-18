@@ -181,7 +181,6 @@
   border: 2px solid var(--range-thumb-border);
   border-radius: 50%;
   background: var(--range-fill);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
 }
 .performance-slider::-moz-range-thumb {
   box-sizing: border-box;
@@ -190,7 +189,6 @@
   border: 2px solid var(--range-thumb-border);
   border-radius: 50%;
   background: var(--range-fill);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
 }
 .slider-value-bubble {
   transform: translateX(-50%);
@@ -236,7 +234,7 @@
 .selector-surface[open] { display: flex; flex-direction: column; }
 .selector-trigger[aria-expanded='true']:not([aria-invalid='true']) { border-color: #0891b2; }
 .dark .selector-trigger[aria-expanded='true']:not([aria-invalid='true']) { border-color: #22d3ee; }
-.selector-popover { border-radius: 12px; box-shadow: 0 12px 32px rgb(15 23 42 / 16%); }
+.selector-popover { border-radius: 12px; }
 .selector-sheet { border-radius: 16px 16px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
 .selector-sheet::backdrop { background: rgb(2 6 23 / 60%); }
 .selector-search { border-color: #cbd5e1; background: #f8fafc; }
@@ -253,7 +251,6 @@
 .selector-options { scrollbar-gutter: stable; touch-action: pan-y; }
 .selector-surface ::selection { background: #a5f3fc; color: #164e63; }
 .dark .selector-surface { border-color: #334155; background: #0f172a; color: #f1f5f9; }
-.dark .selector-popover { box-shadow: 0 12px 32px rgb(0 0 0 / 35%); }
 .dark .selector-search { border-color: #475569; background: #0b0f17; }
 .dark .selector-search:focus-within { border-color: #22d3ee; }
 .dark .selector-group, .dark .selector-description, .dark .selector-close { color: #94a3b8; }
@@ -295,7 +292,7 @@
 }
 /* Tactile press: buttons shrink to 0.97 for 80ms. */
 @utility press {
-  transition: transform var(--dur-press) var(--ease-out-expo), color var(--dur-fast) var(--ease-out-expo), background-color var(--dur-fast) var(--ease-out-expo), border-color var(--dur-fast) var(--ease-out-expo), box-shadow var(--dur-fast) var(--ease-out-expo);
+  transition: transform var(--dur-press) var(--ease-out-expo), color var(--dur-fast) var(--ease-out-expo), background-color var(--dur-fast) var(--ease-out-expo), border-color var(--dur-fast) var(--ease-out-expo);
   &:active:not(:disabled) { transform: scale(0.97); }
 }
 .phosphor-glow { box-shadow: 0 0 8px rgb(34 211 238 / 55%), 0 0 2px rgb(34 211 238 / 90%); }
