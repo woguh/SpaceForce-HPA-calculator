@@ -457,11 +457,14 @@ export default function App() {
               aria-label="Cardiorespiratory Component"
               className="flight-cardio flight-case score-card p-5 sm:p-6 space-y-4"
             >
-              <div className="space-y-2">
-                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 sm:gap-x-4">
+                <h2 className="break-words text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                   1. Cardiorespiratory
                 </h2>
-                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                <div className="text-right">
+                  <ScoreIndicator result={result.cardio} pending={!completion.cardio} />
+                </div>
+                <div className="col-span-2 min-w-0 max-w-full justify-self-start">
                   <SegmentedControl<CardioEventId | 'exempt'>
                     label="Cardio event"
                     value={inputs.cardioExempt ? 'exempt' : inputs.cardioEvent}
@@ -470,7 +473,6 @@ export default function App() {
                       ? updateInputs({ cardioExempt: !inputs.cardioExempt })
                       : updateInputs({ cardioEvent: event, cardioExempt: false })}
                   />
-                  <ScoreIndicator result={result.cardio} pending={!completion.cardio} />
                 </div>
               </div>
 
@@ -510,11 +512,14 @@ export default function App() {
               aria-label="Muscular Strength Component"
               className="flight-case score-card p-5 sm:p-6 space-y-4"
             >
-              <div className="space-y-1">
-                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 sm:gap-x-4">
+                <h2 className="break-words text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                   2. Muscular Strength
                 </h2>
-                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                <div className="text-right">
+                  <ScoreIndicator result={result.strength} pending={!completion.strength} />
+                </div>
+                <div className="col-span-2 min-w-0 max-w-full justify-self-start">
                   <SegmentedControl<StrengthEventId | 'exempt'>
                     label="Strength event"
                     value={inputs.strengthExempt ? 'exempt' : inputs.strengthEvent}
@@ -523,7 +528,6 @@ export default function App() {
                       ? updateInputs({ strengthExempt: !inputs.strengthExempt })
                       : updateInputs({ strengthEvent: event, strengthExempt: false })}
                   />
-                  <ScoreIndicator result={result.strength} pending={!completion.strength} />
                 </div>
               </div>
 
@@ -551,11 +555,14 @@ export default function App() {
               aria-label="Core Endurance Component"
               className="flight-case score-card p-5 sm:p-6 space-y-4"
             >
-              <div className="space-y-1">
-                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 sm:gap-x-4">
+                <h2 className="break-words text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                   3. Core Endurance
                 </h2>
-                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                <div className="text-right">
+                  <ScoreIndicator result={result.core} pending={!completion.core} />
+                </div>
+                <div className="col-span-2 min-w-0 max-w-full justify-self-start">
                   <SegmentedControl<CoreEventId | 'exempt'>
                     label="Core event"
                     value={inputs.coreExempt ? 'exempt' : inputs.coreEvent}
@@ -564,7 +571,6 @@ export default function App() {
                       ? updateInputs({ coreExempt: !inputs.coreExempt })
                       : updateInputs({ coreEvent: event, coreExempt: false })}
                   />
-                  <ScoreIndicator result={result.core} pending={!completion.core} />
                 </div>
               </div>
 
