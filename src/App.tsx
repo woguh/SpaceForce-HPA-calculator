@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import * as m from 'motion/react-m';
 import {
   AlertTriangle,
@@ -11,8 +11,6 @@ import {
   RotateCcw,
   Sun,
 } from 'lucide-react';
-import { AsciiOrbitalBanner } from './components/AsciiOrbitalBanner';
-import { AsciiNavigation } from './components/AsciiNavigation';
 import { GoalOptimizerPanel } from './components/GoalOptimizerPanel';
 import { CopyResultsButton } from './components/CopyResultsButton';
 import { MobileScoreSummary } from './components/MobileScoreSummary';
@@ -24,6 +22,10 @@ import { ScoreIndicator } from './components/ScoreIndicator';
 import { ScoreNumber } from './components/ScoreNumber';
 import { CardioAltitudeBreakdown } from './components/CardioAltitudeBreakdown';
 import { WaistRatioCard } from './components/WaistRatioCard';
+import { ForegroundAsteroid } from './components/ForegroundAsteroid';
+import type { OrbitalDisplayProps } from './components/OrbitalDisplay';
+import { useReducedMotionPreference } from './hooks/useReducedMotionPreference';
+import './flight-console.css';
 import { assessmentEntryCompletion, assessmentEntrySummary, assessmentInputsForEntry, EMPTY_PERFORMANCE, profileSettingsForEntry, type AssessmentEntry } from './utils/assessmentEntry';
 import type { WaistMeasurements } from './utils/waistRatio';
 import {
@@ -43,6 +45,22 @@ import {
 import {
   calculateAssessment,
 } from './utils/calculator';
+
+function UnavailableOrbit({ onUnavailable }: OrbitalDisplayProps) {
+  useEffect(onUnavailable, [onUnavailable]);
+  return null;
+}
+
+const OrbitalDisplay = lazy<React.ComponentType<OrbitalDisplayProps>>(() => import('./components/OrbitalDisplay')
+  .catch(() => ({ default: UnavailableOrbit })));
+const ORBIT_QUERY = '(min-width: 1024px) and (pointer: fine)';
+const showsDesktopOrbit = () => window.matchMedia(ORBIT_QUERY).matches;
+const hideServerOrbit = () => false;
+function subscribeToOrbitVisibility(change: () => void) {
+  const query = window.matchMedia(ORBIT_QUERY);
+  query.addEventListener('change', change);
+  return () => query.removeEventListener('change', change);
+}
 
 const STORAGE_KEY_INPUTS = 'ussf_hpa_calculator_inputs_v1';
 const STORAGE_KEY_THEME = 'ussf_hpa_calculator_theme_v1';
@@ -104,7 +122,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('calculator');
   const workspaceRef = useRef<HTMLDivElement>(null);
   const focusWorkspace = useRef(false);
-  const [isAsciiPaused, setIsAsciiPaused] = useState(false);
+  const [orbitPaused, setOrbitPaused] = useState(false);
+  const [orbitUnavailable, setOrbitUnavailable] = useState(false);
+  const disableOrbit = useCallback(() => setOrbitUnavailable(true), []);
+  const desktopOrbit = useSyncExternalStore(subscribeToOrbitVisibility, showsDesktopOrbit, hideServerOrbit);
+  const showOrbit = desktopOrbit && !orbitUnavailable;
+  const reducedMotion = useReducedMotionPreference();
   const [waistResetToken, setWaistResetToken] = useState(0);
   const [waistMeasurements, setWaistMeasurements] = useState<WaistMeasurements>({ waist: '', height: '' });
 
@@ -156,7 +179,6 @@ export default function App() {
   const summaryAvailable = completion.all && result.totalPossiblePoints > 0;
   const summaryPassed = summaryAvailable && result.passedOverall && result.compositeScore >= 75;
   const summaryFailed = summaryAvailable && !summaryPassed;
-  const summaryGreen = summaryPresentation.initial || summaryPassed;
   const summaryStatus = summaryPresentation.initial ? 'Enter event results' : completion.all ? result.readinessLabel : 'In progress';
   const summaryRef = useRef<HTMLElement>(null);
   const altitudeSpec = ALTITUDE_GROUPS[inputs.altitudeGroup];
@@ -202,7 +224,7 @@ export default function App() {
   };
 
   return (
-    <div className="calculator-app relative min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#05070B] text-slate-900 dark:text-slate-100 transition-colors duration-150">
+    <div className="calculator-app flight-console relative min-h-screen flex flex-col text-slate-900 dark:text-slate-100 transition-colors duration-150">
       <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{scoreAnnouncement}</p>
       <h1 className="sr-only">USSF HPA and PFT calculator</h1>
       <MobileScoreSummary
@@ -210,32 +232,29 @@ export default function App() {
         active={activeTab === 'calculator'}
         score={summaryPresentation.score}
         status={summaryStatus}
-        green={summaryGreen}
+        green={summaryPassed}
         passed={summaryPassed}
         failed={summaryFailed}
       />
+      {showOrbit && <div className="flight-orbit" aria-hidden="true">
+        <Suspense fallback={null}>
+          <OrbitalDisplay paused={orbitPaused || reducedMotion} onUnavailable={disableOrbit} />
+        </Suspense>
+      </div>}
+      {showOrbit && !orbitPaused && !reducedMotion && <ForegroundAsteroid />}
 
-      {/* Full-Viewport Animated ASCII Stars & Moving Spacecraft Background */}
-      <AsciiOrbitalBanner
-        installation={activeInstallation}
-        activeAltitudeGroup={inputs.altitudeGroup}
-        compositeScore={summaryAvailable ? result.compositeScore : null}
-        passedOverall={summaryPassed}
-        isPaused={isAsciiPaused}
-      />
-
-      <div className="relative z-20 flex justify-end px-4 sm:px-8 pt-3 sm:pt-4">
+      <div className="flight-tools relative z-20 flex justify-end px-4 sm:px-8 pt-3 sm:pt-4">
         <div className="flex items-center gap-2">
-          <button
+          {showOrbit && !reducedMotion && <button
             type="button"
-            aria-label={isAsciiPaused ? 'Resume background animation' : 'Pause background animation'}
-            aria-pressed={isAsciiPaused}
-            onClick={() => setIsAsciiPaused((p) => !p)}
-            title={isAsciiPaused ? 'Resume sky' : 'Pause sky'}
+            aria-label={orbitPaused ? 'Resume orbital display animation' : 'Pause orbital display animation'}
+            aria-pressed={orbitPaused}
+            onClick={() => setOrbitPaused(paused => !paused)}
+            title={orbitPaused ? 'Resume orbital display' : 'Pause orbital display'}
             className="press inline-flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:border-cyan-500 cursor-pointer shrink-0"
           >
-            {isAsciiPaused ? <Play className="w-4 h-4" aria-hidden="true" /> : <Pause className="w-4 h-4" aria-hidden="true" />}
-          </button>
+            {orbitPaused ? <Play className="w-4 h-4" aria-hidden="true" /> : <Pause className="w-4 h-4" aria-hidden="true" />}
+          </button>}
 
           <button
             type="button"
@@ -264,35 +283,33 @@ export default function App() {
         </div>
       </div>
 
-      {/* Focused Center Workspace Floating Over Moving ASCII Sky */}
-      <main className="relative z-10 flex-1 w-full max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 pt-2 sm:pt-3 pb-8 space-y-6">
-        <AsciiNavigation<ActiveTab>
-          views={WORKSPACE_VIEWS}
-          activeView={activeTab}
-          onChange={setActiveTab}
-        />
+      <main className="flight-workspace relative z-10 flex-1 w-full max-w-3xl px-4 sm:px-6 pt-2 sm:pt-3 pb-8 space-y-6" data-orbital-display={showOrbit}>
+        <nav aria-label="Workspace Views">
+          <SegmentedControl<ActiveTab>
+            label="Pages"
+            value={activeTab}
+            options={WORKSPACE_VIEWS.map(view => ({ value: view.id, label: view.label }))}
+            variant="workspace"
+            equalWidth
+            onChange={setActiveTab}
+          />
+        </nav>
         {/* Live Composite Score Hero */}
         <section
           ref={summaryRef}
           aria-label="Composite Score Summary"
-          className={`rounded-xl border backdrop-blur-md p-6 transition-colors duration-150 ${
-            summaryGreen
-              ? 'border-emerald-500/40 bg-emerald-950/10 dark:bg-[#081512]/90'
-              : summaryFailed
-                ? 'border-rose-500/45 bg-rose-50/90 dark:bg-[#19080C]/90'
-                : 'border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90'
-          }`}
+          className="flight-score flight-case"
+          data-score-tone={summaryFailed ? 'fail' : summaryPassed ? 'pass' : 'ready'}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flight-score__readout">
+          <div className="flight-score__top">
             <div>
-              <div className="text-xs lg:text-sm font-mono text-slate-500 dark:text-slate-400">
-                U.S. SPACE FORCE HPA · PFT SCORE
-              </div>
+              <h2 className="flight-score__heading">HPA composite score</h2>
               <div className="flex items-baseline gap-3 mt-1">
                 <span
                   data-testid="composite-score-value"
-                  className={`text-5xl sm:text-6xl font-mono font-bold tracking-tight tabular-nums ${
-                    summaryGreen
+                  className={`flight-score__value font-mono font-bold tabular-nums ${
+                    summaryPassed
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : summaryFailed
                         ? 'text-rose-600 dark:text-rose-400'
@@ -305,11 +322,11 @@ export default function App() {
               </div>
             </div>
 
-            <div className="sm:text-right space-y-1">
+            <div className="flight-score__status space-y-1">
               <div
                 data-testid="overall-pass-status"
                 className={`inline-flex items-center gap-1.5 text-sm lg:text-base font-mono font-bold ${
-                  summaryGreen
+                  summaryPassed
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : summaryFailed ? 'text-rose-600 dark:text-rose-400' : 'text-cyan-700 dark:text-cyan-400'
                 }`}
@@ -321,26 +338,17 @@ export default function App() {
                 ) : null}
                 <span>{summaryStatus}</span>
               </div>
-              <div className="text-xs lg:text-sm font-mono text-slate-500 dark:text-slate-400 tabular-nums">
-                Cardio {completion.cardio ? result.cardio.earnedPoints.toFixed(1) : '—'} · Strength{' '}
-                {completion.strength ? result.strength.earnedPoints.toFixed(1) : '—'} · Core{' '}
-                {completion.core ? result.core.earnedPoints.toFixed(1) : '—'}
-                {result.whtr.scoredInComposite
-                  ? ` · WHtR ${completion.whtr ? result.whtr.earnedPoints.toFixed(1) : '—'}`
-                  : ''}
-              </div>
+              <CopyResultsButton inputs={scoringInputs} result={result} enabled={summaryAvailable} />
             </div>
           </div>
 
-          <CopyResultsButton inputs={scoringInputs} result={result} enabled={summaryAvailable} />
-
           {/* Clean Progress Bar — Turns Green at 75+ */}
-          <div className="mt-4 space-y-1.5">
-            <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-900">
+          <div className="flight-score__meter space-y-2">
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-900">
               <m.div
                 initial={false}
                 className={`h-full origin-left ${
-                  summaryGreen
+                  summaryPassed
                     ? 'bg-emerald-500'
                     : summaryFailed ? 'bg-rose-500' : 'bg-cyan-500'
                 }`}
@@ -350,11 +358,25 @@ export default function App() {
               />
               <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-3/4 w-0.5 -translate-x-1/2 bg-white ring-1 ring-slate-950/80" />
             </div>
-            <div className="grid grid-cols-[1rem_1fr_1fr] gap-3 text-[11px] lg:text-sm font-mono text-slate-500 dark:text-slate-400 tabular-nums">
-              <span>0</span>
-              <span className="text-center">75.0 (Health Maintenance Pass)</span>
-              <span className="text-right">90.0+ (Fit to Fight)</span>
+            <span aria-hidden="true" className="flight-score__ruler" />
+            <div className="flight-score__scale" aria-hidden="true">
+              <span>0</span><span>75</span><span>90</span><span>100</span>
             </div>
+            <div className="flight-score__thresholds">
+              <span><b>75</b> Health Maintenance Pass</span>
+              <span><b>90+</b> Fit to Fight</span>
+            </div>
+          </div>
+          <dl className="flight-score__events">
+            {(['cardio', 'strength', 'core', ...(result.whtr.scoredInComposite ? ['whtr'] as const : [])] as const).map(key => {
+              const event = result[key];
+              const ready = completion[key];
+              const label = { cardio: 'Cardio', strength: 'Strength', core: 'Core', whtr: 'WHtR' }[key];
+              const value = event.exempt ? 'Exempt' : !ready ? '—' : event.isPassFailOnly
+                ? (event.passedMinimum ? 'Pass' : 'Fail') : event.earnedPoints.toFixed(1);
+              return <div key={key}><dt>{label}</dt><dd>{value}</dd></div>;
+            })}
+          </dl>
           </div>
         </section>
 
@@ -371,7 +393,7 @@ export default function App() {
             {/* Compact Profile & Base Selector Card */}
             <section
               aria-label="Profile and Base Configuration"
-              className="rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90 backdrop-blur-md p-5 space-y-4"
+              className="flight-profile flight-case p-5 space-y-4"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Sex */}
@@ -433,13 +455,16 @@ export default function App() {
             {/* 1. Cardiorespiratory Card */}
             <section
               aria-label="Cardiorespiratory Component"
-              className="score-card rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90 backdrop-blur-md p-5 space-y-4"
+              className="flight-cardio flight-case score-card p-5 sm:p-6 space-y-4"
             >
-              <div className="space-y-1">
-                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 sm:gap-x-4">
+                <h2 className="break-words text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                   1. Cardiorespiratory
                 </h2>
-                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                <div className="text-right">
+                  <ScoreIndicator result={result.cardio} pending={!completion.cardio} />
+                </div>
+                <div className="col-span-2 min-w-0 max-w-full justify-self-start">
                   <SegmentedControl<CardioEventId | 'exempt'>
                     label="Cardio event"
                     value={inputs.cardioExempt ? 'exempt' : inputs.cardioEvent}
@@ -448,7 +473,6 @@ export default function App() {
                       ? updateInputs({ cardioExempt: !inputs.cardioExempt })
                       : updateInputs({ cardioEvent: event, cardioExempt: false })}
                   />
-                  <ScoreIndicator result={result.cardio} pending={!completion.cardio} />
                 </div>
               </div>
 
@@ -486,13 +510,16 @@ export default function App() {
             {/* 2. Muscular Strength Card */}
             <section
               aria-label="Muscular Strength Component"
-              className="score-card rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90 backdrop-blur-md p-5 space-y-4"
+              className="flight-case score-card p-5 sm:p-6 space-y-4"
             >
-              <div className="space-y-1">
-                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 sm:gap-x-4">
+                <h2 className="break-words text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                   2. Muscular Strength
                 </h2>
-                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                <div className="text-right">
+                  <ScoreIndicator result={result.strength} pending={!completion.strength} />
+                </div>
+                <div className="col-span-2 min-w-0 max-w-full justify-self-start">
                   <SegmentedControl<StrengthEventId | 'exempt'>
                     label="Strength event"
                     value={inputs.strengthExempt ? 'exempt' : inputs.strengthEvent}
@@ -501,7 +528,6 @@ export default function App() {
                       ? updateInputs({ strengthExempt: !inputs.strengthExempt })
                       : updateInputs({ strengthEvent: event, strengthExempt: false })}
                   />
-                  <ScoreIndicator result={result.strength} pending={!completion.strength} />
                 </div>
               </div>
 
@@ -527,13 +553,16 @@ export default function App() {
             {/* 3. Core Endurance Card */}
             <section
               aria-label="Core Endurance Component"
-              className="score-card rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white/90 dark:bg-[#0B0F17]/90 backdrop-blur-md p-5 space-y-4"
+              className="flight-case score-card p-5 sm:p-6 space-y-4"
             >
-              <div className="space-y-1">
-                <h2 className="text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 sm:gap-x-4">
+                <h2 className="break-words text-left text-base sm:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                   3. Core Endurance
                 </h2>
-                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                <div className="text-right">
+                  <ScoreIndicator result={result.core} pending={!completion.core} />
+                </div>
+                <div className="col-span-2 min-w-0 max-w-full justify-self-start">
                   <SegmentedControl<CoreEventId | 'exempt'>
                     label="Core event"
                     value={inputs.coreExempt ? 'exempt' : inputs.coreEvent}
@@ -542,7 +571,6 @@ export default function App() {
                       ? updateInputs({ coreExempt: !inputs.coreExempt })
                       : updateInputs({ coreEvent: event, coreExempt: false })}
                   />
-                  <ScoreIndicator result={result.core} pending={!completion.core} />
                 </div>
               </div>
 
@@ -575,7 +603,7 @@ export default function App() {
                   setWaistMeasurements({ waist: '', height: '' });
                   setWaistResetToken((token) => token + 1);
                 }}
-                className="press inline-flex min-h-8 items-center gap-1 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                className="flight-action-reset press inline-flex min-h-8 items-center gap-1 hover:text-slate-900 dark:hover:text-white cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset to Default Values</span>
@@ -583,7 +611,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => openWorkspace('goal')}
-                className="press min-h-8 font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
+                className="flight-action-goal press min-h-8 font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
               >
                 Need a target score plan? Open Goal Planner →
               </button>

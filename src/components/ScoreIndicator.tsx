@@ -27,7 +27,7 @@ export function ScoreIndicator({ result, detail, pending = false }: ScoreIndicat
 
   if (!pending && (result.exempt || result.isPassFailOnly)) {
     return (
-      <span className={`font-mono text-lg lg:text-xl font-bold ${result.exempt
+      <span className={`font-mono text-sm sm:text-lg lg:text-xl font-bold ${result.exempt
         ? 'text-slate-500 dark:text-slate-400'
         : result.passedMinimum
           ? 'text-emerald-700 dark:text-emerald-400'
@@ -47,11 +47,11 @@ export function ScoreIndicator({ result, detail, pending = false }: ScoreIndicat
       data-maxed={isMaxed}
       data-celebrating={celebrating}
     >
-      <div className="relative z-10 flex items-baseline justify-end gap-2 whitespace-nowrap">
-        <span className="score-indicator__value inline-block text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+      <div className="relative z-10 flex items-baseline justify-end gap-1 whitespace-nowrap sm:gap-2">
+        <span className="score-indicator__value inline-block text-2xl min-[400px]:text-3xl sm:text-4xl lg:text-5xl max-[359px]:text-xl font-extrabold tracking-tight">
           <ScoreNumber value={pending ? null : result.earnedPoints} />
         </span>
-        <span className="text-sm lg:text-base font-bold text-slate-600 dark:text-slate-400">
+        <span className="text-xs sm:text-sm lg:text-base font-bold text-slate-600 dark:text-slate-400">
           {result.maxPoints > 0 ? `/ ${result.maxPoints} pts` : 'Not entered'}
         </span>
       </div>
